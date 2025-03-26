@@ -57,9 +57,6 @@ fun LoginScreen(
     onPatientChange: (Patient) -> Unit,
 ) {
 
-    // data
-    var patient: Patient by remember { mutableStateOf(Patient("", "")) }
-
     // ui states
     var userId: String by remember { mutableStateOf("") }
     var phoneNumber: String by remember { mutableStateOf("") }
@@ -83,7 +80,6 @@ fun LoginScreen(
                     phoneNumber = phoneNumber,
                     onUserIdChange = { value -> userId = value },
                     onPhoneNumberChange = { value -> phoneNumber = value},
-                    onPatientChange = onPatientChange
                 )
             }
         }
@@ -227,7 +223,6 @@ fun LoginSheet(
     onUserIdChange: (String) -> Unit,
     phoneNumber: String,
     onPhoneNumberChange: (String) -> Unit,
-    onPatientChange: (Patient) -> Unit
 ) {
 
     var dropdownExpanded: Boolean by remember { mutableStateOf(false) }
@@ -257,8 +252,6 @@ fun LoginSheet(
                                 dropdownExpanded = false
                             }
                         )
-
-
                     }
                 }
             }
@@ -280,15 +273,10 @@ fun LoginSheet(
         )
         Button(
             onClick = {
-                patientRepository.queryPatientData(userId, "PhoneNumber")
-                    .onSuccess { phoneNum ->
-                        if (phoneNumber == phoneNum) {
-                            navController.popBackStack("login", true)
-                            navController.navigate("home")
-                        }
-
-                        // save current patient for this session
-                        onPatientChange(Patient(userId, phoneNumber))
+                patientRepository.authenticate(userId, phoneNumber)
+                    .onSuccess { _ ->
+                        navController.popBackStack("login", true)
+                        navController.navigate("home")
 
                         // reset UI
                         onUserIdChange("")
