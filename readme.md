@@ -3,20 +3,19 @@
 ## 3. Screens & Functionality
 
 ### 3.1. Welcome Screen (Landing Page)
-- [✓] Design app logo and name ("NutriTrack")
-- [✓] Add disclaimer text
-- [✓] Include external link to Monash Nutrition Clinic
-- [ ] Implement login button (navigates to login screen)
-- [ ] Add TextView with student name + ID format: "Alex Scott (14578373)"
+- [x] Design app logo and name ("NutriTrack")
+- [x] Add disclaimer text
+- [x] Include external link to Monash Nutrition Clinic
+- [x] Implement login button (navigates to login screen)
 
 ### 3.2. Login Screen
-- [ ] Create dropdown for User ID (loaded from CSV file)
-- [ ] Add text field for phone number
-- [ ] Implement continue button
-- [ ] Set up validation rules:
-    - [ ] Verify User ID exists in CSV
-    - [ ] Confirm phone number matches CSV data
-    - [ ] Display error message for invalid entries
+- [x] Create dropdown for User ID (loaded from CSV file)
+- [x] Add text field for phone number
+- [x] Implement continue button
+- [x] Set up validation rules:
+    - [x] Verify User ID exists in CSV
+    - [x] Confirm phone number matches CSV data
+    - [x] Display error message for invalid entries
 
 ### 3.3. Food Intake Questionnaire
 - [ ] Add checkboxes for food categories (Fruits, Vegetables, Grains, etc.)
@@ -49,8 +48,8 @@
     - [ ] "Improve my diet"
 
 ## 4. Data Handling & CSV Integration
-- [ ] Set up CSV file reading functionality
-- [ ] Implement User ID and Phone Number validation
+- [x] Set up CSV file reading functionality
+- [x] Implement User ID and Phone Number validation
 - [ ] Configure Food Quality Score retrieval and display
 - [ ] Add error handling for invalid entries
 
@@ -58,7 +57,7 @@
 
 ### 5.1. Core Requirements
 - [ ] Implement all five screens (Welcome, Login, Questionnaire, Home, Insights)
-- [ ] Configure CSV reading for User ID & Phone Number validation
+- [x] Configure CSV reading for User ID & Phone Number validation
 - [ ] Display Food Quality Score from CSV
 - [ ] Implement basic navigation
 
