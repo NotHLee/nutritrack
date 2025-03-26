@@ -110,6 +110,7 @@ fun LoginScreen(
                 Text(
                     "Nutritrack ",
                     style = MaterialTheme.typography.bodyLarge,
+
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 48.sp
                 )
@@ -281,7 +282,7 @@ fun LoginSheet(
                     patientRepository.authenticate(userId, phoneNumber)
                         .onSuccess { _ ->
                             navController.popBackStack("login", true)
-                            navController.navigate("home")
+                            navController.navigate("question")
 
                             // reset UI
                             onUserIdChange("")

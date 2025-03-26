@@ -9,7 +9,7 @@ import java.io.InputStreamReader
 
 class PatientRepository(val context: Context) {
 
-    private var isAuth: Boolean by mutableStateOf(false)
+    private var isAuth: Boolean by mutableStateOf(true)
     private var patientData: Map<String, String> by mutableStateOf(mapOf())
 
     fun authenticate(userId: String, phoneNumber: String): Result<String> {

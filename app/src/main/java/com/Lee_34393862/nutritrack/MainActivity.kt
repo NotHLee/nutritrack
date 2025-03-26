@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.screen.HomeScreen
 import com.Lee_34393862.nutritrack.screen.LoginScreen
+import com.Lee_34393862.nutritrack.screen.NewUserScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +36,11 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("home") {
                         HomeScreen()
+                    }
+                    composable("question") {
+                        NewUserScreen(
+                            navController = navController
+                        )
                     }
                 }
             }
