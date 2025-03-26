@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.feature.home
+package com.Lee_34393862.nutritrack.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding

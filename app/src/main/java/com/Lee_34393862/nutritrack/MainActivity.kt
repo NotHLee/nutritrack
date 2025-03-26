@@ -8,9 +8,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.Lee_34393862.nutritrack.core.data.PatientRepository
-import com.Lee_34393862.nutritrack.feature.home.HomeScreen
-import com.Lee_34393862.nutritrack.feature.login.LoginScreen
+import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.screen.HomeScreen
+import com.Lee_34393862.nutritrack.screen.LoginScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 
 class MainActivity : ComponentActivity() {

@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.core.data
+package com.Lee_34393862.nutritrack.data
 
 import android.content.Context
 import androidx.compose.runtime.getValue
