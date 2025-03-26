@@ -3,9 +3,9 @@
 ## 3. Screens & Functionality
 
 ### 3.1. Welcome Screen (Landing Page)
-- [ ] Design app logo and name ("NutriTrack")
-- [ ] Add disclaimer text
-- [ ] Include external link to Monash Nutrition Clinic
+- [✓] Design app logo and name ("NutriTrack")
+- [✓] Add disclaimer text
+- [✓] Include external link to Monash Nutrition Clinic
 - [ ] Implement login button (navigates to login screen)
 - [ ] Add TextView with student name + ID format: "Alex Scott (14578373)"
 
