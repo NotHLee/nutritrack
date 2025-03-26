@@ -1,7 +1,5 @@
 package com.Lee_34393862.nutritrack.feature.login
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,13 +10,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,27 +33,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.core.data.PatientRepository
-import com.Lee_34393862.nutritrack.core.model.Patient
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun LoginScreen(
     patientRepository: PatientRepository,
     navController: NavHostController,
-    onPatientChange: (Patient) -> Unit,
 ) {
 
     // ui states
@@ -64,7 +62,9 @@ fun LoginScreen(
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         // login sheet
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
         if (loginExpanded) {
             ModalBottomSheet(
                 sheetState = sheetState,
@@ -74,7 +74,6 @@ fun LoginScreen(
                 LoginSheet(
                     navController = navController,
                     patientRepository = patientRepository,
-                    expanded = loginExpanded,
                     onExpandedChange = { value -> loginExpanded = value },
                     userId = userId,
                     phoneNumber = phoneNumber,
@@ -180,7 +179,6 @@ fun DisclaimerText() {
 @Composable
 fun ClickableLink() {
     val url = "https://www.monash.edu/medicine/scs/nutrition/clinics/nutrition"
-    val uriHandler = LocalUriHandler.current
 
     val annotatedString = buildAnnotatedString {
         pushStyle(
@@ -191,24 +189,17 @@ fun ClickableLink() {
             )
         )
         append(url)
-        addStringAnnotation(
-            tag = "URL",
-            annotation = url,
+        addLink(
+            LinkAnnotation.Url(url = url),
             start = 0,
             end = url.length
         )
         pop()
     }
 
-    ClickableText(
+    Text(
         text = annotatedString,
         style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                .firstOrNull()?.let { annotation ->
-                    uriHandler.openUri(annotation.item)
-                }
-        },
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -217,7 +208,6 @@ fun ClickableLink() {
 fun LoginSheet(
     navController: NavHostController,
     patientRepository: PatientRepository,
-    expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     userId: String,
     onUserIdChange: (String) -> Unit,
@@ -238,24 +228,15 @@ fun LoginSheet(
             fontSize = 24.sp
         )
         Spacer(modifier = Modifier.size(16.dp))
-        if (dropdownExpanded) {
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { dropdownExpanded = false },
-                modifier = Modifier.fillMaxWidth(0.9f)
-            ) {
-                patientRepository.getAllUserId().onSuccess { userIds ->
-                    userIds.forEach { userId ->
-                        DropdownMenuItem(
-                            text = { Text(userId.toString()) },
-                            onClick = {
-                                dropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
+
+        DropdownSelector(
+            items = patientRepository.getAllUserId().getOrThrow(),
+            expanded = dropdownExpanded,
+            onExpandedChange = { dropdownExpanded = it },
+            value = userId,
+            onValueChange =  { onUserIdChange(it) }
+        )
+
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
             value = phoneNumber,
@@ -292,4 +273,45 @@ fun LoginSheet(
             Text("Continue")
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownSelector(
+    items: List<String>,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    TextField(
+        value = value,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text("My ID (Provided by your clinician)") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        trailingIcon = {
+            IconButton(onClick = { onExpandedChange(true) }) {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            }
+            DropdownMenu(
+                offset = DpOffset(x = (-64).dp, y = 0.dp),
+                expanded = expanded,
+                onDismissRequest = { onExpandedChange(false) }
+            ) {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(item) },
+                        onClick = {
+                            onValueChange(item)
+                            onExpandedChange(false)
+                        }
+                    )
+                    HorizontalDivider()
+                }
+            }
+        }
+    )
 }
