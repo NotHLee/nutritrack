@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("question") {
                         NewUserScreen(
+                            context = this@MainActivity,
                             navController = navController
                         )
                     }

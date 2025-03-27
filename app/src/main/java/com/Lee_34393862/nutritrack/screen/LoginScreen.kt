@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +54,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
-import com.Lee_34393862.nutritrack.ui.theme.errorContainerLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -254,12 +252,13 @@ fun LoginSheet(
             )
             Spacer(modifier = Modifier.size(16.dp))
 
-            DropdownSelector(
+            CustomDropdownSelector(
                 items = patientRepository.getAllUserId().getOrThrow(),
+                label = "My ID (Provided by your clinician)",
                 expanded = dropdownExpanded,
                 onExpandedChange = { dropdownExpanded = it },
                 value = userId,
-                onValueChange = { onUserIdChange(it) }
+                onValueChange = { onUserIdChange(it) },
             )
 
             Spacer(modifier = Modifier.size(16.dp))
@@ -301,47 +300,6 @@ fun LoginSheet(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DropdownSelector(
-    items: List<String>,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    value: String,
-    onValueChange: (String) -> Unit,
-) {
-    TextField(
-        value = value,
-        onValueChange = {},
-        readOnly = true,
-        label = { Text("My ID (Provided by your clinician)") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        trailingIcon = {
-            IconButton(onClick = { onExpandedChange(true) }) {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            }
-            DropdownMenu(
-                offset = DpOffset(x = (-64).dp, y = 0.dp),
-                expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) }
-            ) {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(item) },
-                        onClick = {
-                            onValueChange(item)
-                            onExpandedChange(false)
-                        }
-                    )
-                    HorizontalDivider()
-                }
-            }
-        }
-    )
 }
 
 @Composable

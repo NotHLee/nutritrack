@@ -1,45 +1,52 @@
 package com.Lee_34393862.nutritrack.screen
 
-import android.app.Dialog
+import android.content.Context
+import android.icu.util.Calendar
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,65 +54,163 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
+import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
+import com.Lee_34393862.nutritrack.shared.CustomTimePicker
 
 data class Persona(val name: String, val description: String, val picture: Int, var isExpanded: Boolean)
+data class Food(val name: String, var checked: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewUserScreen(navController: NavHostController) {
+fun NewUserScreen(navController: NavHostController, context: Context) {
 
-    val checkboxes = remember {
-        mutableStateListOf<Boolean>(false,false,false,false,false,false,false,false,false)
+    val foodList = remember {
+        mutableStateListOf(
+            Food(name = "Fruits", checked = false),
+            Food(name = "Red Meat", checked = false),
+            Food(name = "Fish", checked = false),
+            Food(name = "Vegetables", checked = false),
+            Food(name = "Seafood", checked = false),
+            Food(name = "Eggs", checked = false),
+            Food(name = "Grains", checked = false),
+            Food(name = "Poultry", checked = false),
+            Food(name = "Nuts/Seeds", checked = false)
+        )
     }
+    val personaList = remember {
+        mutableStateListOf(
+            Persona(
+                name = "Health Devotee",
+                description = "I'm passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.",
+                picture = R.drawable.persona_1,
+                isExpanded = false
+            ),
+            Persona(
+                name = "Mindful Eater",
+                description = "I'm health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.",
+                picture = R.drawable.persona_2,
+                isExpanded = false
+            ),
+            Persona(
+                name = "Wellness Striver",
+                description = "I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I've tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I'll give it a go.",
+                picture = R.drawable.persona_3,
+                isExpanded = false
+            ),
+            Persona(
+                name = "Balance Seeker",
+                description = "I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn't have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.",
+                picture = R.drawable.persona_4,
+                isExpanded = false
+            ),
+            Persona(
+                name = "Health Procrastinator",
+                description = "I'm contemplating healthy eating but it's not a priority for me right now. I know the basics about what it means to be healthy, but it doesn't seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.",
+                picture = R.drawable.persona_5,
+                isExpanded = false
+            ),
+            Persona(
+                name = "Food Carefree",
+                description = "I'm not bothered about healthy eating. I don't really see the point and I don't think about it. I don't really notice healthy eating tips or recipes and I don't care what I eat.",
+                picture = R.drawable.persona_6,
+                isExpanded = false
+            )
+        )
+    }
+
+    var selectedPersona by remember { mutableStateOf<Persona?>(null) }
+    var dropdownSelectorExpanded by remember { mutableStateOf<Boolean>(false) }
+    val currentTime = Calendar.getInstance()
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = true
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-
                 title = {
                     Text(
-                    "Food Intake Questionnaire",
+                        "Food Intake Questionnaire",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.ExtraBold
-                ) },
-                actions = { IconButton(
-                    onClick = {
-                        navController.popBackStack("question", true)
-                        navController.navigate("login")
-                    }
-                )
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack("question", true)
+                            navController.navigate("login")
+                        }
+                    )
                     {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back button")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back button"
+                        )
                     }
                 }
             )
         }
-
-    ){ innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)
-        ){
-            HorizontalDivider()
+        ) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Spacer(modifier = Modifier.size(8.dp))
             FoodCategories(
-                checkboxes = checkboxes,
-                onCheckedChange = { index, value -> checkboxes[index] = value }
+                foodList = foodList,
+                onCheckedChange = { index, checked ->
+                    foodList[index] = foodList[index].copy(checked = checked)
+                }
             )
-            HorizontalDivider()
-            PersonaInfo()
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            PersonaInfo(
+                personaList = personaList,
+                onExpand = { index ->
+                    personaList[index] = personaList[index].copy(isExpanded = true)
+                },
+                onDismissRequest = { index ->
+                    personaList[index] = personaList[index].copy(isExpanded = false)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                "Which persona best fits you?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            CustomDropdownSelector(
+                items = personaList.map { persona -> persona.name },
+                label = "Select persona",
+                value = selectedPersona?.name ?: "",
+                onValueChange = { name ->
+                    selectedPersona = personaList.find { persona -> persona.name == name }
+                },
+                expanded = dropdownSelectorExpanded,
+                onExpandedChange = { dropdownSelectorExpanded = it }
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            CustomTimePicker(
+                context = context,
+                time = "00:00",
+                isExpanded = true,
+                onTimeChange = { }
+            )
         }
-
-
-
     }
 }
 
+
 @Composable
 fun FoodCategories(
-    checkboxes: List<Boolean>,
+    foodList: List<Food>,
     onCheckedChange: (Int, Boolean) -> Unit
 ) {
-    Spacer(modifier = Modifier.size(8.dp))
     Text(
         "Tick all the food categories you can eat",
         style = MaterialTheme.typography.titleMedium,
@@ -113,19 +218,22 @@ fun FoodCategories(
         modifier = Modifier.padding(horizontal = 16.dp)
     )
     Spacer(modifier = Modifier.size(8.dp))
-    LazyHorizontalGrid(
-        rows = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.SpaceBetween,
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
-            .fillMaxHeight(0.2f)
-            .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        itemsIndexed(checkboxes) { index, checked ->
+        itemsIndexed(foodList) { index, food ->
             Row {
                 Checkbox(
-                    checked = checked,
-                    onCheckedChange = { onCheckedChange(index, !checked) }
+                    checked = food.checked,
+                    onCheckedChange = { onCheckedChange(index, !food.checked) }
+                )
+                Text(
+                    food.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         }
@@ -133,48 +241,12 @@ fun FoodCategories(
 }
 
 @Composable
-fun PersonaInfo() {
+fun PersonaInfo(
+    personaList: List<Persona>,
+    onExpand: (Int) -> Unit,
+    onDismissRequest: (Int) -> Unit,
+) {
 
-    val personaList = remember { mutableStateListOf(
-        Persona(
-            name = "Health Devotee",
-            description = "I'm passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.",
-            picture = R.drawable.persona_1,
-            isExpanded = false
-        ),
-        Persona(
-            name = "Mindful Eater",
-            description = "I'm health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.",
-            picture = R.drawable.persona_2,
-            isExpanded = false
-        ),
-        Persona(
-            name = "Wellness Striver",
-            description = "I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I've tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I'll give it a go.",
-            picture = R.drawable.persona_3,
-            isExpanded = false
-        ),
-        Persona(
-            name = "Balance Seeker",
-            description = "I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn't have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.",
-            picture = R.drawable.persona_4,
-            isExpanded = false
-        ),
-        Persona(
-            name = "Health Procrastinator",
-            description = "I'm contemplating healthy eating but it's not a priority for me right now. I know the basics about what it means to be healthy, but it doesn't seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.",
-            picture = R.drawable.persona_5,
-            isExpanded = false
-        ),
-        Persona(
-            name = "Food Carefree",
-            description = "I'm not bothered about healthy eating. I don't really see the point and I don't think about it. I don't really notice healthy eating tips or recipes and I don't care what I eat.",
-            picture = R.drawable.persona_6,
-            isExpanded = false
-        )
-    )}
-
-    Spacer(modifier = Modifier.size(8.dp))
     Text(
         "Your Persona",
         style = MaterialTheme.typography.titleMedium,
@@ -184,27 +256,27 @@ fun PersonaInfo() {
     Spacer(modifier = Modifier.size(8.dp))
     Text(
         "People can be broadly classified into 6 different types based on their eating preferences. " +
-            "Click on each button below to find out the different types, and select the type that best fits you!",
+        "Click on each button below to find out the different types, and select the type that best fits you!",
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(horizontal = 16.dp)
     )
-    LazyHorizontalGrid(
-        rows = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxHeight(0.5f)
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        itemsIndexed(personaList) { index, persona ->
-            PersonaDialog(
-                name = persona.name,
-                description = persona.description,
-                picture = persona.picture,
-                isExpanded = persona.isExpanded,
-                onExpand = { personaList[index] = personaList[index].copy(isExpanded = true) },
-                onDismissRequest = { personaList[index] = personaList[index].copy(isExpanded = false) }
-            )
+    Surface {
+        LazyVerticalGrid (
+            columns = GridCells.Fixed(3),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+        ) {
+            itemsIndexed(personaList) { index, persona ->
+                PersonaDialog(
+                    name = persona.name,
+                    description = persona.description,
+                    picture = persona.picture,
+                    isExpanded = persona.isExpanded,
+                    onExpand = { onExpand(index) },
+                    onDismissRequest = { onDismissRequest(index) }
+                )
+            }
         }
     }
 }
@@ -217,9 +289,7 @@ fun PersonaDialog(
     isExpanded: Boolean,
     onExpand: () -> Unit,
     onDismissRequest: () -> Unit
-
 ) {
-
     TextButton(
         onClick = { onExpand() },
         colors = ButtonColors(
@@ -229,46 +299,56 @@ fun PersonaDialog(
             disabledContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.secondaryContainer),
         ),
         shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+
     ) {
         Text(
             name,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
         )
     }
 
-        if (isExpanded) {
-            Dialog(
-                onDismissRequest = { onDismissRequest() }
+    if (isExpanded) {
+        Dialog(
+            onDismissRequest = { onDismissRequest() }
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Card(
+                Icon(
+                    painter = painterResource(picture),
+                    contentDescription = "persona image",
+                    tint = Color.Unspecified
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(picture),
-                        contentDescription = "persona image",
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                }
+                        .padding(horizontal = 16.dp),
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
+}
 
+@Composable
+fun Timings(
+
+) {
+
+}
 
