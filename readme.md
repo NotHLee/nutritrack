@@ -18,13 +18,13 @@
     - [x] Display error message for invalid entries
 
 ### 3.3. Food Intake Questionnaire
-- [ ] Add checkboxes for food categories (Fruits, Vegetables, Grains, etc.)
-- [ ] Implement persona selection buttons (six categories)
-- [ ] Create dropdown for selecting best-fitting persona
-- [ ] Add time pickers for:
-    - [ ] Biggest meal time
-    - [ ] Sleep time
-    - [ ] Wake-up time
+- [x] Add checkboxes for food categories (Fruits, Vegetables, Grains, etc.)
+- [x] Implement persona selection buttons (six categories)
+- [x] Create dropdown for selecting best-fitting persona
+- [x] Add time pickers for:
+    - [x] Biggest meal time
+    - [x] Sleep time
+    - [x] Wake-up time
 - [ ] Implement save button (stores data in SharedPreferences)
 
 ### 3.4. Home Screen (Food Quality Score)

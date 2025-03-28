@@ -9,10 +9,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.data.PatientRepository
-import com.Lee_34393862.nutritrack.screen.HomeScreen
+import com.Lee_34393862.nutritrack.screen.Dashboard
 import com.Lee_34393862.nutritrack.screen.LoginScreen
 import com.Lee_34393862.nutritrack.screen.NewUserScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
+
+sealed class Screens(val route: String) {
+    object Login: Screens("login")
+    object Question: Screens("question")
+    object Dashboard: Screens("dashboard")
+}
 
 class MainActivity : ComponentActivity() {
 
@@ -26,26 +32,26 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = "question"
+                    startDestination = Screens.Dashboard.route
                 ) {
-                    composable("login") {
+                    composable(Screens.Login.route) {
                         LoginScreen(
                             navController = navController,
                             patientRepository = patientRepository,
                         )
                     }
-                    composable("home") {
-                        HomeScreen()
-                    }
-                    composable("question") {
+                    composable(Screens.Question.route) {
                         NewUserScreen(
-                            context = this@MainActivity,
                             navController = navController
                         )
+                    }
+                    composable(Screens.Dashboard.route) {
+                        Dashboard()
                     }
                 }
             }
         }
     }
 }
+
 

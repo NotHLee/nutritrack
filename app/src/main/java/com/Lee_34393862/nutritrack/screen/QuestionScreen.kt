@@ -1,14 +1,7 @@
 package com.Lee_34393862.nutritrack.screen
 
-import android.app.TimePickerDialog
 import android.content.Context
-import android.icu.util.Calendar
-import android.util.Log
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
@@ -32,15 +24,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -50,8 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,8 +56,9 @@ data class TimeBox(val question: String, var time: LocalTime, var isOpen: Boolea
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewUserScreen(navController: NavHostController, context: Context) {
+fun NewUserScreen(navController: NavHostController) {
 
+    val context = LocalContext.current
     val foodList = remember {
         mutableStateListOf<Food>(
             Food(name = "Fruits", checked = false),
@@ -219,9 +207,9 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
                 items = timeBoxList,
                 onTimeChange = { index, time -> timeBoxList[index] = timeBoxList[index].copy(time = time) }
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
             Button(
-                onClick = { onSave() },
+                onClick = { onSave(navController = navController) },
                 colors = ButtonColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.contentColorFor(
@@ -234,7 +222,8 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth(0.45f),
+                shape = RoundedCornerShape(size = 16.dp)
             ) {
                 Row (
                     verticalAlignment = Alignment.CenterVertically
@@ -425,6 +414,6 @@ fun TimeQuestions(
     }
 }
 
-fun onSave(){
-
+fun onSave(navController: NavHostController){
+    navController.navigate("home")
 }

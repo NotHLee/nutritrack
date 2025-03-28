@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -31,9 +30,10 @@ fun CustomDropdownSelector(
 ) {
     TextField(
         colors = TextFieldDefaults.colors(
-            disabledLabelColor = MaterialTheme.colorScheme.primary,
+            disabledLabelColor = Color.DarkGray,
             disabledTextColor = Color.Black,
-            disabledTrailingIconColor = Color.Black
+            disabledTrailingIconColor = Color.DarkGray,
+            disabledIndicatorColor = Color.Black
         ),
         enabled = false,
         value = value,
