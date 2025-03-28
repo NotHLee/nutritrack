@@ -1,11 +1,14 @@
 package com.Lee_34393862.nutritrack.screen
 
+import android.app.TimePickerDialog
 import android.content.Context
 import android.icu.util.Calendar
+import android.util.Log
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -43,6 +47,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -56,16 +61,18 @@ import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
+import java.time.LocalTime
 
 data class Persona(val name: String, val description: String, val picture: Int, var isExpanded: Boolean)
 data class Food(val name: String, var checked: Boolean)
+data class TimeBox(val question: String, var time: LocalTime, var isOpen: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewUserScreen(navController: NavHostController, context: Context) {
 
     val foodList = remember {
-        mutableStateListOf(
+        mutableStateListOf<Food>(
             Food(name = "Fruits", checked = false),
             Food(name = "Red Meat", checked = false),
             Food(name = "Fish", checked = false),
@@ -78,7 +85,7 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
         )
     }
     val personaList = remember {
-        mutableStateListOf(
+        mutableStateListOf<Persona>(
             Persona(
                 name = "Health Devotee",
                 description = "I'm passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.",
@@ -117,15 +124,28 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
             )
         )
     }
+    val timeBoxList = remember {
+        mutableStateListOf<TimeBox>(
+            TimeBox(
+                question = "What time of day approx, do you normally eat your biggest meal?",
+                time = LocalTime.MIDNIGHT,
+                isOpen = false
+            ),
+            TimeBox(
+                question = "What time of day approx, do you go to sleep at night?",
+                time = LocalTime.MIDNIGHT,
+                isOpen = false
+            ),
+            TimeBox(
+                question = "What time of day approx, do you wake up in the morning?",
+                time = LocalTime.MIDNIGHT,
+                isOpen = false
+            )
+        )
+    }
 
     var selectedPersona by remember { mutableStateOf<Persona?>(null) }
     var dropdownSelectorExpanded by remember { mutableStateOf<Boolean>(false) }
-    val currentTime = Calendar.getInstance()
-    val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
-        is24Hour = true
-    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -138,7 +158,7 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
                         fontWeight = FontWeight.ExtraBold
                     )
                 },
-                actions = {
+                navigationIcon = {
                     IconButton(
                         onClick = {
                             navController.popBackStack("question", true)
@@ -159,7 +179,6 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
             modifier = Modifier.padding(innerPadding)
         ) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            Spacer(modifier = Modifier.size(8.dp))
             FoodCategories(
                 foodList = foodList,
                 onCheckedChange = { index, checked ->
@@ -195,12 +214,41 @@ fun NewUserScreen(navController: NavHostController, context: Context) {
                 onExpandedChange = { dropdownSelectorExpanded = it }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            CustomTimePicker(
+            TimeQuestions(
                 context = context,
-                time = "00:00",
-                isExpanded = true,
-                onTimeChange = { }
+                items = timeBoxList,
+                onTimeChange = { index, time -> timeBoxList[index] = timeBoxList[index].copy(time = time) }
             )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            Button(
+                onClick = { onSave() },
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.contentColorFor(
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    ),
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.contentColorFor(
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(0.5f)
+            ) {
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Icon(painterResource(R.drawable.save), contentDescription = "save icon")
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text(
+                        "Save",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
 }
@@ -217,7 +265,6 @@ fun FoodCategories(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(horizontal = 16.dp)
     )
-    Spacer(modifier = Modifier.size(8.dp))
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -260,23 +307,21 @@ fun PersonaInfo(
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(horizontal = 16.dp)
     )
-    Surface {
-        LazyVerticalGrid (
-            columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-        ) {
-            itemsIndexed(personaList) { index, persona ->
-                PersonaDialog(
-                    name = persona.name,
-                    description = persona.description,
-                    picture = persona.picture,
-                    isExpanded = persona.isExpanded,
-                    onExpand = { onExpand(index) },
-                    onDismissRequest = { onDismissRequest(index) }
-                )
-            }
+    LazyVerticalGrid (
+        columns = GridCells.Fixed(3),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+    ) {
+        itemsIndexed(personaList) { index, persona ->
+            PersonaDialog(
+                name = persona.name,
+                description = persona.description,
+                picture = persona.picture,
+                isExpanded = persona.isExpanded,
+                onExpand = { onExpand(index) },
+                onDismissRequest = { onDismissRequest(index) }
+            )
         }
     }
 }
@@ -346,9 +391,40 @@ fun PersonaDialog(
 }
 
 @Composable
-fun Timings(
-
+fun TimeQuestions(
+    context: Context,
+    items: List<TimeBox>,
+    onTimeChange: (Int, LocalTime) -> Unit,
 ) {
-
+    Column (
+        modifier = Modifier.padding(horizontal = 16.dp),
+    ){
+        Text(
+            "Timings",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.size(size = 8.dp))
+        items.forEachIndexed { index, item ->
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ){
+                Text(
+                    item.question,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(0.7f)
+                )
+                CustomTimePicker(
+                    context = context,
+                    time = item.time,
+                    onTimeChange = { time -> onTimeChange(index, time) }
+                )
+            }
+        }
+    }
 }
 
+fun onSave(){
+
+}
