@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -197,8 +196,7 @@ fun QuestionScreen(navController: NavHostController, patientRepository: PatientR
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.popBackStack("question", true)
-                            navController.navigate("login")
+                            navController.popBackStack()
                         }
                     )
                     {

@@ -5,11 +5,9 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.edit
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import androidx.core.content.edit
-import org.json.JSONObject
-import java.time.LocalTime
 
 class PatientRepository(val context: Context) {
 
@@ -63,16 +61,6 @@ class PatientRepository(val context: Context) {
         }
     }
 
-    fun getPatientData(): Result<Map<String,String>> {
-
-        if (patientData.isEmpty()) {
-            return Result.failure(Exception("Not logged in"))
-        }
-
-        return Result.success(patientData)
-
-    }
-
     fun getAllUserId() : Result<List<String>> {
 
         val userIdSet = sortedSetOf<Int>()
@@ -112,12 +100,23 @@ class PatientRepository(val context: Context) {
 
         // get the relevant id
         val id = queryPatientData("User_ID").getOrThrow()
-        Log.d("pref id", id)
 
         val sharedPref = context.getSharedPreferences(
             id, Context.MODE_PRIVATE
         )
 
         return sharedPref.getString(key, "").toString()
+    }
+
+    fun getTotalFoodScore(): String {
+
+        // extract food score based on gender
+        val gender = queryPatientData("Sex").getOrThrow()
+
+        return when (gender) {
+            "Male" -> queryPatientData("HEIFAtotalscoreMale").getOrThrow()
+            "Female" -> queryPatientData("HEIFAtotalscoreFemale").getOrThrow()
+            else -> "error"
+        }
     }
 }

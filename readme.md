@@ -25,14 +25,14 @@
     - [x] Biggest meal time
     - [x] Sleep time
     - [x] Wake-up time
-- [ ] Implement save button (stores data in SharedPreferences)
+- [x] Implement save button (stores data in SharedPreferences)
 
 ### 3.4. Home Screen (Food Quality Score)
-- [ ] Add greeting: "Hello, [User's Name]"
-- [ ] Implement edit button (returns to questionnaire)
-- [ ] Display Food Score (loaded from CSV)
-- [ ] Add explanation text about Food Quality Score
-- [ ] Implement navigation options (bottom bar or buttons)
+- [x] Add greeting: "Hello, [User's Name]"
+- [x] Implement edit button (returns to questionnaire)
+- [x] Display Food Score (loaded from CSV)
+- [x] Add explanation text about Food Quality Score
+- [x] Implement navigation options (bottom bar or buttons)
 
 ### 3.5. Insights Screen (Detailed Breakdown)
 - [ ] Create progress bars for food categories:
@@ -59,7 +59,7 @@
 - [ ] Implement all five screens (Welcome, Login, Questionnaire, Home, Insights)
 - [x] Configure CSV reading for User ID & Phone Number validation
 - [ ] Display Food Quality Score from CSV
-- [ ] Implement basic navigation
+- [x] Implement basic navigation
 
 ### 5.2. Not Required (Future Work)
 - Settings screen

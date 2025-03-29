@@ -47,7 +47,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(Screens.Dashboard.route) {
-                        Dashboard()
+                        Dashboard(
+                            patientRepository = patientRepository,
+                            navigateToQuestion = { navController.navigate(Screens.Question.route) }
+                        )
                     }
                 }
             }

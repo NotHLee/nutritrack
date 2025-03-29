@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
+import com.Lee_34393862.nutritrack.data.PatientRepository
 
 sealed class DashboardScreens(
     val route: String,
@@ -52,7 +53,10 @@ sealed class DashboardScreens(
 }
 
 @Composable
-fun Dashboard() {
+fun Dashboard(
+    patientRepository: PatientRepository,
+    navigateToQuestion: () -> Unit
+) {
 
     val navController: NavHostController = rememberNavController()
 
@@ -65,7 +69,12 @@ fun Dashboard() {
             startDestination = DashboardScreens.Home.route
         ) {
             composable(route = DashboardScreens.Home.route) {
-                HomeScreen(innerPadding)
+                HomeScreen(
+                    innerPadding,
+                    patientRepository = patientRepository,
+                    navigateToQuestion = { navigateToQuestion() },
+                    navigateToInsights = { navController.navigate(DashboardScreens.Insights.route) }
+                )
             }
             composable(route = DashboardScreens.Insights.route) {
                 InsightsScreen(innerPadding)
