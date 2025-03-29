@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +47,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.Lee_34393862.nutritrack.R
+import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,7 +85,6 @@ fun LoginScreen(
                 LoginSheet(
                     navController = navController,
                     patientRepository = patientRepository,
-                    onExpandedChange = { value -> loginExpanded = value },
                     userId = userId,
                     phoneNumber = phoneNumber,
                     onUserIdChange = { value -> userId = value },
@@ -102,7 +105,6 @@ fun LoginScreen(
                 Text(
                     "Nutritrack ",
                     style = MaterialTheme.typography.bodyLarge,
-
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 48.sp
                 )
@@ -216,7 +218,6 @@ fun ClickableLink() {
 fun LoginSheet(
     navController: NavHostController,
     patientRepository: PatientRepository,
-    onExpandedChange: (Boolean) -> Unit,
     userId: String,
     onUserIdChange: (String) -> Unit,
     phoneNumber: String,
@@ -274,14 +275,7 @@ fun LoginSheet(
                 onClick = {
                     patientRepository.authenticate(userId, phoneNumber)
                         .onSuccess { _ ->
-                            navController.popBackStack("login", true)
-                            navController.navigate("question")
-
-                            // reset UI
-                            onUserIdChange("")
-                            onPhoneNumberChange("")
-                            onExpandedChange(false)
-                            dropdownExpanded = false
+                            navController.navigate(Screens.Question.route)
                         }
                         .onFailure { error ->
                             scope.launch {

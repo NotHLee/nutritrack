@@ -1,15 +1,18 @@
 package com.Lee_34393862.nutritrack.data
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import androidx.core.content.edit
+import org.json.JSONObject
+import java.time.LocalTime
 
 class PatientRepository(val context: Context) {
 
-    private var isAuth: Boolean by mutableStateOf(true)
     private var patientData: Map<String, String> by mutableStateOf(mapOf())
 
     fun authenticate(userId: String, phoneNumber: String): Result<String> {
@@ -28,8 +31,9 @@ class PatientRepository(val context: Context) {
                 lines.forEach { line ->
                     val values = line.split(",")
                     if (values[userIdIndex] == userId && values[phoneNumIndex] == phoneNumber) {
-                        isAuth = true
                         patientData = header.zip(values).toMap()
+                        Log.d("data", patientData.toString())
+                        return Result.success("Successful login")
                     }
                 }
             }
@@ -38,19 +42,14 @@ class PatientRepository(val context: Context) {
             return Result.failure(e)
         }
 
-        // send response message
-        return if (isAuth) {
-            Result.success("Auth successful")
-        } else {
-            Result.failure(Exception("Invalid credentials"))
-        }
+        return Result.failure(Exception("Invalid credentials"))
 
     }
 
     fun queryPatientData(queryParam: String) : Result<String> {
 
-        if (!isAuth) {
-            return Result.failure(Exception("Not authenticated"))
+        if (patientData.isEmpty()) {
+            return Result.failure(Exception("Not logged in"))
         }
 
         try {
@@ -66,8 +65,8 @@ class PatientRepository(val context: Context) {
 
     fun getPatientData(): Result<Map<String,String>> {
 
-        if (!isAuth) {
-            return Result.failure(Exception("Not authenticated"))
+        if (patientData.isEmpty()) {
+            return Result.failure(Exception("Not logged in"))
         }
 
         return Result.success(patientData)
@@ -95,5 +94,30 @@ class PatientRepository(val context: Context) {
         } catch (e: Exception) {
             return Result.failure(e)
         }
+    }
+
+    fun savePreference(key: String, value: String) {
+
+        // get the relevant id
+        val id = queryPatientData("User_ID").getOrThrow()
+
+        context.getSharedPreferences(
+            id, Context.MODE_PRIVATE
+        ).edit() {
+            putString(key, value)
+        }
+    }
+
+    fun getPreference(key: String): String {
+
+        // get the relevant id
+        val id = queryPatientData("User_ID").getOrThrow()
+        Log.d("pref id", id)
+
+        val sharedPref = context.getSharedPreferences(
+            id, Context.MODE_PRIVATE
+        )
+
+        return sharedPref.getString(key, "").toString()
     }
 }

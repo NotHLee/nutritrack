@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
+import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
 import java.time.LocalTime
@@ -54,22 +56,61 @@ data class Persona(val name: String, val description: String, val picture: Int, 
 data class Food(val name: String, var checked: Boolean)
 data class TimeBox(val question: String, var time: LocalTime, var isOpen: Boolean)
 
+sealed class Saved(val key: String) {
+    object FoodList: Saved("foodListIndices")
+    object TimeBoxList: Saved("timeBoxValues")
+    object SelectedPersona: Saved("selectedPersonaIndex")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewUserScreen(navController: NavHostController) {
+fun QuestionScreen(navController: NavHostController, patientRepository: PatientRepository) {
 
     val context = LocalContext.current
+
+    // load shared preferences
+    val foodListIndices: List<Boolean> = remember {
+        patientRepository.getPreference(Saved.FoodList.key).let { str ->
+            if (str.isEmpty()) {
+                List(9) { false }
+            } else {
+                str.substring(1, str.length - 1).split(",")
+                    .map { boolStr -> boolStr.trim().toBoolean() }
+            }
+        }
+    }
+    val timeBoxValues: List<LocalTime> = remember {
+        patientRepository.getPreference(Saved.TimeBoxList.key).let { str ->
+            if (str.isEmpty()) {
+                List(3) { LocalTime.MIDNIGHT }
+            } else {
+                str.substring(1, str.length - 1).split(",")
+                    .map { timeStr -> LocalTime.parse(timeStr.trim()) }
+            }
+        }
+    }
+    val selectedPersonaIndex: Int? = remember {
+        patientRepository.getPreference(Saved.SelectedPersona.key).let { str ->
+            if (str == "-1" || str.isEmpty()) {
+                // -1 refers to no selection was found
+                null
+            } else {
+                str.trim().toInt()
+            }
+        }
+    }
+
     val foodList = remember {
         mutableStateListOf<Food>(
-            Food(name = "Fruits", checked = false),
-            Food(name = "Red Meat", checked = false),
-            Food(name = "Fish", checked = false),
-            Food(name = "Vegetables", checked = false),
-            Food(name = "Seafood", checked = false),
-            Food(name = "Eggs", checked = false),
-            Food(name = "Grains", checked = false),
-            Food(name = "Poultry", checked = false),
-            Food(name = "Nuts/Seeds", checked = false)
+            Food(name = "Fruits", checked = foodListIndices[0]),
+            Food(name = "Red Meat", checked = foodListIndices[1]),
+            Food(name = "Fish", checked = foodListIndices[2]),
+            Food(name = "Vegetables", checked = foodListIndices[3]),
+            Food(name = "Seafood", checked = foodListIndices[4]),
+            Food(name = "Eggs", checked = foodListIndices[5]),
+            Food(name = "Grains", checked = foodListIndices[6]),
+            Food(name = "Poultry", checked = foodListIndices[7]),
+            Food(name = "Nuts/Seeds", checked = foodListIndices[8])
         )
     }
     val personaList = remember {
@@ -116,23 +157,30 @@ fun NewUserScreen(navController: NavHostController) {
         mutableStateListOf<TimeBox>(
             TimeBox(
                 question = "What time of day approx, do you normally eat your biggest meal?",
-                time = LocalTime.MIDNIGHT,
+                time = timeBoxValues[0],
                 isOpen = false
             ),
             TimeBox(
                 question = "What time of day approx, do you go to sleep at night?",
-                time = LocalTime.MIDNIGHT,
+                time = timeBoxValues[1],
                 isOpen = false
             ),
             TimeBox(
                 question = "What time of day approx, do you wake up in the morning?",
-                time = LocalTime.MIDNIGHT,
+                time = timeBoxValues[2],
                 isOpen = false
             )
         )
     }
 
-    var selectedPersona by remember { mutableStateOf<Persona?>(null) }
+    var selectedPersona by remember { mutableStateOf<Persona?>(
+        if (selectedPersonaIndex != null) {
+            personaList[selectedPersonaIndex]
+        }
+        else {
+            null
+        }
+    ) }
     var dropdownSelectorExpanded by remember { mutableStateOf<Boolean>(false) }
 
     Scaffold(
@@ -209,7 +257,18 @@ fun NewUserScreen(navController: NavHostController) {
             )
             HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
             Button(
-                onClick = { onSave(navController = navController) },
+                onClick = {
+                    navController.navigate("dashboard")
+                    patientRepository.savePreference(Saved.FoodList.key, foodList
+                        .map { food -> food.checked }
+                        .toString()
+                    )
+                    patientRepository.savePreference(Saved.TimeBoxList.key, timeBoxList.map { timeBox -> timeBox.time }.toString())
+                    patientRepository.savePreference(Saved.SelectedPersona.key, personaList.indexOf(
+                        personaList.find { persona -> persona == selectedPersona })
+                        .toString()
+                    )
+                },
                 colors = ButtonColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.contentColorFor(
@@ -412,8 +471,4 @@ fun TimeQuestions(
             }
         }
     }
-}
-
-fun onSave(navController: NavHostController){
-    navController.navigate("home")
 }
