@@ -197,7 +197,7 @@ fun QuestionScreen(navController: NavHostController, patientRepository: PatientR
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.navigate(Screens.Question.route)
+                            navController.navigate(Screens.Login.route)
                         }
                     )
                     {

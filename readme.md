@@ -35,30 +35,24 @@
 - [x] Implement navigation options (bottom bar or buttons)
 
 ### 3.5. Insights Screen (Detailed Breakdown)
-- [ ] Create progress bars for food categories:
-    - [ ] Vegetables
-    - [ ] Fruits
-    - [ ] Grains & Cereals
-    - [ ] Whole Grains
-    - [ ] Meat
-    - [ ] Dairy
-- [ ] Display Total Score Calculation (from CSV)
-- [ ] Add buttons:
-    - [ ] "Share with someone"
-    - [ ] "Improve my diet"
+- [x] Create progress bars for each food category
+- [x] Display Total Score Calculation (from CSV)
+- [x] Add buttons:
+    - [x] "Share with someone"
+    - [x] "Improve my diet"
 
 ## 4. Data Handling & CSV Integration
 - [x] Set up CSV file reading functionality
 - [x] Implement User ID and Phone Number validation
-- [ ] Configure Food Quality Score retrieval and display
-- [ ] Add error handling for invalid entries
+- [x] Configure Food Quality Score retrieval and display
+- [x] Add error handling for invalid entries
 
 ## 5. Requirements Assessment
 
 ### 5.1. Core Requirements
-- [ ] Implement all five screens (Welcome, Login, Questionnaire, Home, Insights)
+- [x] Implement all five screens (Welcome, Login, Questionnaire, Home, Insights)
 - [x] Configure CSV reading for User ID & Phone Number validation
-- [ ] Display Food Quality Score from CSV
+- [x] Display Food Quality Score from CSV
 - [x] Implement basic navigation
 
 ### 5.2. Not Required (Future Work)

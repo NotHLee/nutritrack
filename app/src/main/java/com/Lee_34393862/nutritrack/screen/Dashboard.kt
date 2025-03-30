@@ -79,7 +79,8 @@ fun Dashboard(
             composable(route = DashboardScreens.Insights.route) {
                 InsightsScreen(
                     innerPadding,
-                    patientRepository = patientRepository
+                    patientRepository = patientRepository,
+                    navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
                 )
             }
             composable(route = DashboardScreens.Nutritrack.route) {
