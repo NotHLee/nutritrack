@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
+import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
@@ -196,7 +197,7 @@ fun QuestionScreen(navController: NavHostController, patientRepository: PatientR
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.popBackStack()
+                            navController.navigate(Screens.Question.route)
                         }
                     )
                     {

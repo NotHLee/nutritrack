@@ -119,4 +119,15 @@ class PatientRepository(val context: Context) {
             else -> "error"
         }
     }
+
+    fun queryFoodScore(queryParam: String): String {
+        // extract food score based on gender
+        val gender = queryPatientData("Sex").getOrThrow()
+
+        return when (gender) {
+            "Male" -> queryPatientData(queryParam + "HEIFAscoreMale").getOrThrow()
+            "Female" -> queryPatientData(queryParam + "HEIFAscoreFemale").getOrThrow()
+            else -> ""
+        }
+    }
 }

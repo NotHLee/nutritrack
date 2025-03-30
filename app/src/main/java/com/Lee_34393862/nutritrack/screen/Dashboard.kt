@@ -77,7 +77,10 @@ fun Dashboard(
                 )
             }
             composable(route = DashboardScreens.Insights.route) {
-                InsightsScreen(innerPadding)
+                InsightsScreen(
+                    innerPadding,
+                    patientRepository = patientRepository
+                )
             }
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(innerPadding)
