@@ -431,7 +431,14 @@ fun PersonaDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Button(
+                    onClick = { onDismissRequest() },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 8.dp)
+                ) {
+                    Text("Dismiss")
+                }
             }
         }
     }
