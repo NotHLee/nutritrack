@@ -1,0 +1,80 @@
+package com.Lee_34393862.nutritrack.data.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+/**
+ * Represents a patient entity in the database
+ */
+@Entity(tableName = "patients")
+data class Patient(
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val phoneNumber: String,
+    val userId: Int,
+    val sex: String,
+    val heifaTotalScoreMale: Double,
+    val heifaTotalScoreFemale: Double,
+    val discretionaryHeifaScoreMale: Double,
+    val discretionaryHeifaScoreFemale: Double,
+    val discretionaryServeSize: Double,
+    val vegetablesHeifaScoreMale: Double,
+    val vegetablesHeifaScoreFemale: Double,
+    val vegetablesWithLegumesAllocatedServeSize: Double,
+    val legumesAllocatedVegetables: Double,
+    val vegetablesVariationsScore: Double,
+    val vegetablesCruciferous: Double,
+    val vegetablesTuberAndBulb: Double,
+    val vegetablesOther: Double,
+    val legumes: Double,
+    val vegetablesGreen: Double,
+    val vegetablesRedAndOrange: Double,
+    val fruitHeifaScoreMale: Double,
+    val fruitHeifaScoreFemale: Double,
+    val fruitServeSize: Double,
+    val fruitVariationsScore: Double,
+    val fruitPome: Double,
+    val fruitTropicalAndSubtropical: Double,
+    val fruitBerry: Double,
+    val fruitStone: Double,
+    val fruitCitrus: Double,
+    val fruitOther: Double,
+    val grainsAndCerealsHeifaScoreMale: Double,
+    val grainsAndCerealsHeifaScoreFemale: Double,
+    val grainsAndCerealsServeSize: Double,
+    val grainsAndCerealsNonWholeGrains: Double,
+    val wholeGrainsHeifaScoreMale: Double,
+    val wholeGrainsHeifaScoreFemale: Double,
+    val wholeGrainsServeSize: Double,
+    val meatAndAlternativesHeifaScoreMale: Double,
+    val meatAndAlternativesHeifaScoreFemale: Double,
+    val meatAndAlternativesWithLegumesAllocatedServeSize: Double,
+    val legumesAllocatedMeatAndAlternatives: Double,
+    val dairyAndAlternativesHeifaScoreMale: Double,
+    val dairyAndAlternativesHeifaScoreFemale: Double,
+    val dairyAndAlternativesServeSize: Double,
+    val sodiumHeifaScoreMale: Double,
+    val sodiumHeifaScoreFemale: Double,
+    val sodiumMgMilligrams: Double,
+    val alcoholHeifaScoreMale: Double,
+    val alcoholHeifaScoreFemale: Double,
+    val alcoholStandardDrinks: Double,
+    val waterHeifaScoreMale: Double,
+    val waterHeifaScoreFemale: Double,
+    val water: Double,
+    val waterTotalMl: Double,
+    val beverageTotalMl: Double,
+    val sugarHeifaScoreMale: Double,
+    val sugarHeifaScoreFemale: Double,
+    val sugar: Double,
+    val saturatedFatHeifaScoreMale: Double,
+    val saturatedFatHeifaScoreFemale: Double,
+    val saturatedFat: Double,
+    val unsaturatedFatHeifaScoreMale: Double,
+    val unsaturatedFatHeifaScoreFemale: Double,
+    val unsaturatedFatServeSize: Double
+
+
+
+)
