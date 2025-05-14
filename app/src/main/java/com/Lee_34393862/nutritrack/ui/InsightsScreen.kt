@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.screen
+package com.Lee_34393862.nutritrack.ui
 
 import android.content.Intent
 import android.content.Intent.ACTION_SEND

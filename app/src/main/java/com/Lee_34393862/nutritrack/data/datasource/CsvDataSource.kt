@@ -5,7 +5,6 @@ import android.util.Log
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.entities.Patient
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -19,7 +18,7 @@ object CsvDataSource {
      * Check if database ia already seeded
      */
     suspend fun isDatabaseSeeded(database: AppDatabase): Boolean {
-        return database.patientDao().getAllPatients().firstOrNull().isNullOrEmpty()
+        return !database.patientDao().getAllPatients().firstOrNull().isNullOrEmpty()
     }
 
     /**
@@ -44,8 +43,10 @@ object CsvDataSource {
             var patientData: Map<String, String> = mapOf()
             lines.forEach { line ->
                 val values = line.split(",")
+                Log.d("test", values.toString())
                 patientData = header.zip(values).toMap()
                 var patient = mapToPatient(patientData)
+                Log.d("patient", patient.toString())
                 database.patientDao().insert(patient = patient)
                 database.foodIntakeDao().insert(foodIntake = FoodIntake(userId = patient.userId))
             }
@@ -58,97 +59,95 @@ object CsvDataSource {
      */
     fun mapToPatient(entry: Map<String, String>): Patient {
         return Patient(
-            name = "",
+            name = "", // Assuming 'name' is not in the CSV based on the original code
             phoneNumber = entry["PhoneNumber"] ?: "",
             userId = entry["User_ID"]?.toInt() ?: 0,
             sex = entry["Sex"] ?: "",
             heifaTotalScoreMale = entry["HEIFAtotalscoreMale"]?.toDouble() ?: 0.0,
             heifaTotalScoreFemale = entry["HEIFAtotalscoreFemale"]?.toDouble() ?: 0.0,
-            discretionaryHeifaScoreMale = entry["discretionaryHeifaScoreMale"]?.toDouble()
+            discretionaryHeifaScoreMale = entry["DiscretionaryHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            discretionaryHeifaScoreFemale = entry["discretionaryHeifaScoreFemale"]?.toDouble()
+            discretionaryHeifaScoreFemale = entry["DiscretionaryHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            discretionaryServeSize = entry["discretionaryServeSize"]?.toDouble() ?: 0.0,
-            vegetablesHeifaScoreMale = entry["vegetablesHeifaScoreMale"]?.toDouble() ?: 0.0,
-            vegetablesHeifaScoreFemale = entry["vegetablesHeifaScoreFemale"]?.toDouble()
+            discretionaryServeSize = entry["Discretionaryservesize"]?.toDouble() ?: 0.0,
+            vegetablesHeifaScoreMale = entry["VegetablesHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            vegetablesHeifaScoreFemale = entry["VegetablesHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            vegetablesWithLegumesAllocatedServeSize = entry["vegetablesWithLegumesAllocatedServeSize"]?.toDouble()
+            vegetablesWithLegumesAllocatedServeSize = entry["Vegetableswithlegumesallocatedservesize"]?.toDouble()
                 ?: 0.0,
-            legumesAllocatedVegetables = entry["legumesAllocatedVegetables"]?.toDouble()
+            legumesAllocatedVegetables = entry["LegumesallocatedVegetables"]?.toDouble()
                 ?: 0.0,
-            vegetablesVariationsScore = entry["vegetablesVariationsScore"]?.toDouble()
+            vegetablesVariationsScore = entry["Vegetablesvariationsscore"]?.toDouble()
                 ?: 0.0,
-            vegetablesCruciferous = entry["vegetablesCruciferous"]?.toDouble() ?: 0.0,
-            vegetablesTuberAndBulb = entry["vegetablesTuberAndBulb"]?.toDouble() ?: 0.0,
-            vegetablesOther = entry["vegetablesOther"]?.toDouble() ?: 0.0,
-            legumes = entry["legumes"]?.toDouble() ?: 0.0,
-            vegetablesGreen = entry["vegetablesGreen"]?.toDouble() ?: 0.0,
-            vegetablesRedAndOrange = entry["vegetablesRedAndOrange"]?.toDouble() ?: 0.0,
-            fruitHeifaScoreMale = entry["fruitHeifaScoreMale"]?.toDouble() ?: 0.0,
-            fruitHeifaScoreFemale = entry["fruitHeifaScoreFemale"]?.toDouble() ?: 0.0,
-            fruitServeSize = entry["fruitServeSize"]?.toDouble() ?: 0.0,
-            fruitVariationsScore = entry["fruitVariationsScore"]?.toDouble() ?: 0.0,
-            fruitPome = entry["fruitPome"]?.toDouble() ?: 0.0,
-            fruitTropicalAndSubtropical = entry["fruitTropicalAndSubtropical"]?.toDouble()
+            vegetablesCruciferous = entry["VegetablesCruciferous"]?.toDouble() ?: 0.0,
+            vegetablesTuberAndBulb = entry["VegetablesTuberandbulb"]?.toDouble() ?: 0.0,
+            vegetablesOther = entry["VegetablesOther"]?.toDouble() ?: 0.0,
+            legumes = entry["Legumes"]?.toDouble() ?: 0.0,
+            vegetablesGreen = entry["VegetablesGreen"]?.toDouble() ?: 0.0,
+            vegetablesRedAndOrange = entry["VegetablesRedandorange"]?.toDouble() ?: 0.0,
+            fruitHeifaScoreMale = entry["FruitHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            fruitHeifaScoreFemale = entry["FruitHEIFAscoreFemale"]?.toDouble() ?: 0.0,
+            fruitServeSize = entry["Fruitservesize"]?.toDouble() ?: 0.0,
+            fruitVariationsScore = entry["Fruitvariationsscore"]?.toDouble() ?: 0.0,
+            fruitPome = entry["FruitPome"]?.toDouble() ?: 0.0,
+            fruitTropicalAndSubtropical = entry["FruitTropicalandsubtropical"]?.toDouble()
                 ?: 0.0,
-            fruitBerry = entry["fruitBerry"]?.toDouble() ?: 0.0,
-            fruitStone = entry["fruitStone"]?.toDouble() ?: 0.0,
-            fruitCitrus = entry["fruitCitrus"]?.toDouble() ?: 0.0,
-            fruitOther = entry["fruitOther"]?.toDouble() ?: 0.0,
-            grainsAndCerealsHeifaScoreMale = entry["grainsAndCerealsHeifaScoreMale"]?.toDouble()
+            fruitBerry = entry["FruitBerry"]?.toDouble() ?: 0.0,
+            fruitStone = entry["FruitStone"]?.toDouble() ?: 0.0,
+            fruitCitrus = entry["FruitCitrus"]?.toDouble() ?: 0.0,
+            fruitOther = entry["FruitOther"]?.toDouble() ?: 0.0,
+            grainsAndCerealsHeifaScoreMale = entry["GrainsandcerealsHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            grainsAndCerealsHeifaScoreFemale = entry["grainsAndCerealsHeifaScoreFemale"]?.toDouble()
+            grainsAndCerealsHeifaScoreFemale = entry["GrainsandcerealsHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            grainsAndCerealsServeSize = entry["grainsAndCerealsServeSize"]?.toDouble()
+            grainsAndCerealsServeSize = entry["Grainsandcerealsservesize"]?.toDouble()
                 ?: 0.0,
-            grainsAndCerealsNonWholeGrains = entry["grainsAndCerealsNonWholeGrains"]?.toDouble()
+            grainsAndCerealsNonWholeGrains = entry["GrainsandcerealsNonwholegrains"]?.toDouble()
                 ?: 0.0,
-            wholeGrainsHeifaScoreMale = entry["wholeGrainsHeifaScoreMale"]?.toDouble()
+            wholeGrainsHeifaScoreMale = entry["WholegrainsHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            wholeGrainsHeifaScoreFemale = entry["wholeGrainsHeifaScoreFemale"]?.toDouble()
+            wholeGrainsHeifaScoreFemale = entry["WholegrainsHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            wholeGrainsServeSize = entry["wholeGrainsServeSize"]?.toDouble() ?: 0.0,
-            meatAndAlternativesHeifaScoreMale = entry["meatAndAlternativesHeifaScoreMale"]?.toDouble()
+            wholeGrainsServeSize = entry["Wholegrainsservesize"]?.toDouble() ?: 0.0,
+            meatAndAlternativesHeifaScoreMale = entry["MeatandalternativesHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            meatAndAlternativesHeifaScoreFemale = entry["meatAndAlternativesHeifaScoreFemale"]?.toDouble()
+            meatAndAlternativesHeifaScoreFemale = entry["MeatandalternativesHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            meatAndAlternativesWithLegumesAllocatedServeSize = entry["meatAndAlternativesWithLegumesAllocatedServeSize"]?.toDouble()
+            meatAndAlternativesWithLegumesAllocatedServeSize = entry["Meatandalternativeswithlegumesallocatedservesize"]?.toDouble()
                 ?: 0.0,
-            legumesAllocatedMeatAndAlternatives = entry["legumesAllocatedMeatAndAlternatives"]?.toDouble()
+            legumesAllocatedMeatAndAlternatives = entry["LegumesallocatedMeatandalternatives"]?.toDouble()
                 ?: 0.0,
-            dairyAndAlternativesHeifaScoreMale = entry["dairyAndAlternativesHeifaScoreMale"]?.toDouble()
+            dairyAndAlternativesHeifaScoreMale = entry["DairyandalternativesHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            dairyAndAlternativesHeifaScoreFemale = entry["dairyAndAlternativesHeifaScoreFemale"]?.toDouble()
+            dairyAndAlternativesHeifaScoreFemale = entry["DairyandalternativesHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            dairyAndAlternativesServeSize = entry["dairyAndAlternativesServeSize"]?.toDouble()
+            dairyAndAlternativesServeSize = entry["Dairyandalternativesservesize"]?.toDouble()
                 ?: 0.0,
-            sodiumHeifaScoreMale = entry["sodiumHeifaScoreMale"]?.toDouble() ?: 0.0,
-            sodiumHeifaScoreFemale = entry["sodiumHeifaScoreFemale"]?.toDouble() ?: 0.0,
-            sodiumMgMilligrams = entry["sodiumMgMilligrams"]?.toDouble() ?: 0.0,
-            alcoholHeifaScoreMale = entry["alcoholHeifaScoreMale"]?.toDouble() ?: 0.0,
-            alcoholHeifaScoreFemale = entry["alcoholHeifaScoreFemale"]?.toDouble() ?: 0.0,
-            alcoholStandardDrinks = entry["alcoholStandardDrinks"]?.toDouble() ?: 0.0,
-            waterHeifaScoreMale = entry["waterHeifaScoreMale"]?.toDouble() ?: 0.0,
-            waterHeifaScoreFemale = entry["waterHeifaScoreFemale"]?.toDouble() ?: 0.0,
-            water = entry["water"]?.toDouble() ?: 0.0,
-            waterTotalMl = entry["waterTotalMl"]?.toDouble() ?: 0.0,
-            beverageTotalMl = entry["beverageTotalMl"]?.toDouble() ?: 0.0,
-            sugarHeifaScoreMale = entry["sugarHeifaScoreMale"]?.toDouble() ?: 0.0,
-            sugarHeifaScoreFemale = entry["sugarHeifaScoreFemale"]?.toDouble() ?: 0.0,
-            sugar = entry["sugar"]?.toDouble() ?: 0.0,
-            saturatedFatHeifaScoreMale = entry["saturatedFatHeifaScoreMale"]?.toDouble()
+            sodiumHeifaScoreMale = entry["SodiumHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            sodiumHeifaScoreFemale = entry["SodiumHEIFAscoreFemale"]?.toDouble() ?: 0.0,
+            sodiumMgMilligrams = entry["Sodiummgmilligrams"]?.toDouble() ?: 0.0,
+            alcoholHeifaScoreMale = entry["AlcoholHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            alcoholHeifaScoreFemale = entry["AlcoholHEIFAscoreFemale"]?.toDouble() ?: 0.0,
+            alcoholStandardDrinks = entry["Alcoholstandarddrinks"]?.toDouble() ?: 0.0,
+            waterHeifaScoreMale = entry["WaterHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            waterHeifaScoreFemale = entry["WaterHEIFAscoreFemale"]?.toDouble() ?: 0.0,
+            water = entry["Water"]?.toDouble() ?: 0.0,
+            waterTotalMl = entry["WaterTotalmL"]?.toDouble() ?: 0.0,
+            beverageTotalMl = entry["BeverageTotalmL"]?.toDouble() ?: 0.0,
+            sugarHeifaScoreMale = entry["SugarHEIFAscoreMale"]?.toDouble() ?: 0.0,
+            sugarHeifaScoreFemale = entry["SugarHEIFAscoreFemale"]?.toDouble() ?: 0.0,
+            sugar = entry["Sugar"]?.toDouble() ?: 0.0,
+            saturatedFatHeifaScoreMale = entry["SaturatedFatHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            saturatedFatHeifaScoreFemale = entry["saturatedFatHeifaScoreFemale"]?.toDouble()
+            saturatedFatHeifaScoreFemale = entry["SaturatedFatHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            saturatedFat = entry["saturatedFat"]?.toDouble() ?: 0.0,
-            unsaturatedFatHeifaScoreMale = entry["unsaturatedFatHeifaScoreMale"]?.toDouble()
+            saturatedFat = entry["SaturatedFat"]?.toDouble() ?: 0.0,
+            unsaturatedFatHeifaScoreMale = entry["UnsaturatedFatHEIFAscoreMale"]?.toDouble()
                 ?: 0.0,
-            unsaturatedFatHeifaScoreFemale = entry["unsaturatedFatHeifaScoreFemale"]?.toDouble()
+            unsaturatedFatHeifaScoreFemale = entry["UnsaturatedFatHEIFAscoreFemale"]?.toDouble()
                 ?: 0.0,
-            unsaturatedFatServeSize = entry["unsaturatedFatServeSize"]?.toDouble() ?: 0.0
+            unsaturatedFatServeSize = entry["UnsaturatedFatservesize"]?.toDouble() ?: 0.0
         )
     }
-
-
 }
 

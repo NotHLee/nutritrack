@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.screen
+package com.Lee_34393862.nutritrack.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.screen
+package com.Lee_34393862.nutritrack.ui
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -106,7 +106,7 @@ fun DashboardBottomBar(
 
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
 
-    NavigationBar() {
+    NavigationBar {
         screens.forEachIndexed { index, screen ->
             NavigationBarItem(
                 icon = {

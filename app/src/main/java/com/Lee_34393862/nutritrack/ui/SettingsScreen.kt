@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.screen
+package com.Lee_34393862.nutritrack.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun NutritrackScreen(
+fun SettingsScreen(
     innerPadding: PaddingValues
 ) {
     Column (
         modifier = Modifier.padding(innerPadding)
     ){
-        Text("Nutritrack")
+        Text("Settings")
     }
 }
