@@ -9,12 +9,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "patients")
 data class Patient(
 
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val phoneNumber: String,
+    @PrimaryKey
     val userId: Int,
+    val name: String,
+    val phoneNumber: String,
     val sex: String,
-    val heifaTotalScoreMale: Double,
+    val heifaTotalScoreMale: Double = 0.0,
     val heifaTotalScoreFemale: Double,
     val discretionaryHeifaScoreMale: Double,
     val discretionaryHeifaScoreFemale: Double,
@@ -74,5 +74,4 @@ data class Patient(
     val unsaturatedFatHeifaScoreMale: Double,
     val unsaturatedFatHeifaScoreFemale: Double,
     val unsaturatedFatServeSize: Double
-
 )

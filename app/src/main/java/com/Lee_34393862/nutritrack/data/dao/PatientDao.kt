@@ -25,6 +25,6 @@ interface PatientDao {
     @Query("DELETE FROM patients")
     suspend fun deleteAllPatients()
 
-    @Query("SELECT * FROM patients ORDER BY id ASC")
+    @Query("SELECT * FROM patients ORDER BY userId ASC")
     fun getAllPatients(): Flow<List<Patient>>
 }

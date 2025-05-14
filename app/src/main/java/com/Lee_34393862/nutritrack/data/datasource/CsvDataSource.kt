@@ -2,43 +2,40 @@ package com.Lee_34393862.nutritrack.data.datasource
 
 import android.content.Context
 import android.util.Log
-import com.Lee_34393862.nutritrack.data.dao.PatientDao
-import com.Lee_34393862.nutritrack.data.databases.AppDatabase
+import com.Lee_34393862.nutritrack.data.AppDatabase
+import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import kotlin.Int
-import kotlin.sequences.forEach
 
 /**
  * Class to load csv data to AppDatabase upon first entry
  */
-class CsvDataSource(val context: Context) {
-
-    private val CSV_FILENAME = "patients.csv"
-    val database: AppDatabase = AppDatabase.getDatabase(context)
-    val patientDao: PatientDao = database.patientDao()
+object CsvDataSource {
 
     /**
      * Check if database ia already seeded
      */
-
-    private fun isDatabaseSeeded(): Boolean {
-        return runBlocking {
-            patientDao.getAllPatients().first().isNotEmpty()
-        }
+    suspend fun isDatabaseSeeded(database: AppDatabase): Boolean {
+        return database.patientDao().getAllPatients().first().isNotEmpty()
     }
 
     /**
      * Parse patient data CSV to a list of patients
      */
-    private fun parseCSV(): List<Map<String, String>> {
-        var patients = mutableListOf<Map<String, String>>()
+    suspend fun parseCSV(context: Context): Unit {
+
+        val database: AppDatabase = AppDatabase.getDatabase(context)
+
+        // early exit if db is already seeded
+        if (isDatabaseSeeded(database = database)) return
+
+        Log.d("populate", "populating database")
+
+        // read the csv line by line and map it as a patient entity to be inserted in the db
         val assets = context.assets
-        val inputStream = assets.open(CSV_FILENAME)
+        val inputStream = assets.open("patients.csv")
         val reader = BufferedReader(InputStreamReader(inputStream))
         val header = reader.readLine().split(",")
 
@@ -47,11 +44,12 @@ class CsvDataSource(val context: Context) {
             lines.forEach { line ->
                 val values = line.split(",")
                 patientData = header.zip(values).toMap()
-                patients.add(patientData)
+                var patient = mapToPatient(patientData)
+                database.patientDao().insert(patient = patient)
+                database.foodIntakeDao().insert(foodIntake = FoodIntake(userId = patient.userId))
             }
         }
         reader.close()
-        return patients
     }
 
     /**
@@ -59,12 +57,12 @@ class CsvDataSource(val context: Context) {
      */
     fun mapToPatient(entry: Map<String, String>): Patient {
         return Patient(
-            id = 0,
-            phoneNumber = entry["phoneNumber"] ?: "",
-            userId = entry["userId"]?.toInt() ?: 0,
-            sex = entry["sex"] ?: "",
-            heifaTotalScoreMale = entry["heifaTotalScoreMale"]?.toDouble() ?: 0.0,
-            heifaTotalScoreFemale = entry["heifaTotalScoreFemale"]?.toDouble() ?: 0.0,
+            name = "",
+            phoneNumber = entry["PhoneNumber"] ?: "",
+            userId = entry["User_ID"]?.toInt() ?: 0,
+            sex = entry["Sex"] ?: "",
+            heifaTotalScoreMale = entry["HEIFAtotalscoreMale"]?.toDouble() ?: 0.0,
+            heifaTotalScoreFemale = entry["HEIFAtotalscoreFemale"]?.toDouble() ?: 0.0,
             discretionaryHeifaScoreMale = entry["discretionaryHeifaScoreMale"]?.toDouble()
                 ?: 0.0,
             discretionaryHeifaScoreFemale = entry["discretionaryHeifaScoreFemale"]?.toDouble()
@@ -149,4 +147,7 @@ class CsvDataSource(val context: Context) {
             unsaturatedFatServeSize = entry["unsaturatedFatServeSize"]?.toDouble() ?: 0.0
         )
     }
+
+
 }
+
