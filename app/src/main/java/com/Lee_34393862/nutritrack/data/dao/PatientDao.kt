@@ -22,9 +22,12 @@ interface PatientDao {
     @Delete
     suspend fun delete(patient: Patient)
 
+    @Query("SELECT * FROM patients WHERE userId = :userId LIMIT 1")
+    fun getPatientByUserId(userId: Int): Flow<Patient?>
+
     @Query("DELETE FROM patients")
     suspend fun deleteAllPatients()
 
     @Query("SELECT * FROM patients ORDER BY userId ASC")
-    fun getAllPatients(): Flow<List<Patient>>
+    fun getAllPatients(): Flow<List<Patient>?>
 }

@@ -11,6 +11,7 @@ data class Patient(
     @PrimaryKey
     val userId: Int,
     val name: String = "",
+    val password: String = "",
     val phoneNumber: String = "",
     val sex: String = "",
     val heifaTotalScoreMale: Double = 0.0,

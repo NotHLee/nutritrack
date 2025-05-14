@@ -26,6 +26,6 @@ class PatientRepository {
         patientDao.deleteAllPatients()
     }
 
-    fun getAllPatients(): Flow<List<Patient>> = patientDao.getAllPatients()
+    fun getAllPatients(): Flow<List<Patient>?> = patientDao.getAllPatients()
 
 }

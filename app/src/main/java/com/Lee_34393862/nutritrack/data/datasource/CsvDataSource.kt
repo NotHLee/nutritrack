@@ -6,6 +6,7 @@ import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -18,13 +19,13 @@ object CsvDataSource {
      * Check if database ia already seeded
      */
     suspend fun isDatabaseSeeded(database: AppDatabase): Boolean {
-        return database.patientDao().getAllPatients().first().isNotEmpty()
+        return database.patientDao().getAllPatients().firstOrNull().isNullOrEmpty()
     }
 
     /**
      * Parse patient data CSV to a list of patients
      */
-    suspend fun parseCSV(context: Context): Unit {
+    suspend fun parseCSV(context: Context) {
 
         val database: AppDatabase = AppDatabase.getDatabase(context)
 
