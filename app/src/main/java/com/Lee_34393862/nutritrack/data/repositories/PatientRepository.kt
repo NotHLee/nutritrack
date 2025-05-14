@@ -2,7 +2,7 @@ package com.Lee_34393862.nutritrack.data.repositories
 
 import android.content.Context
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
-import com.Lee_34393862.nutritrack.data.databases.PatientDatabase
+import com.Lee_34393862.nutritrack.data.databases.AppDatabase
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +11,7 @@ class PatientRepository {
     var patientDao: PatientDao
 
     constructor(context: Context) {
-        patientDao = PatientDatabase.getDatabase(context).patientDao()
+        patientDao = AppDatabase.getDatabase(context).patientDao()
     }
 
     suspend fun insert(patient: Patient) {
