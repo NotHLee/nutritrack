@@ -4,6 +4,7 @@ import android.content.Context
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.FoodIntakeDao
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
+import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
