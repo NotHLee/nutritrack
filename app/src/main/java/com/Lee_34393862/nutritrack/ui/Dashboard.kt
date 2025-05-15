@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.screen.HomeScreen
 
 sealed class DashboardScreens(
     val route: String,
