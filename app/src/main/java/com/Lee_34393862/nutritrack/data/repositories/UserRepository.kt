@@ -15,14 +15,14 @@ class UserRepository {
     var foodIntakeDao: FoodIntakeDao
 
     // hold current userId as state flow
-    val currentUserId = MutableStateFlow<Int?>(null)
+    val currentUser = MutableStateFlow<Patient?>(null)
 
     constructor(context: Context) {
         patientDao = AppDatabase.getDatabase(context = context).patientDao()
         foodIntakeDao = AppDatabase.getDatabase(context = context).foodIntakeDao()
     }
 
-    suspend fun authenticate(userId: Int, password: String): Result<String> {
+    suspend fun authenticate(userId: String, password: String): Result<String> {
 
         // query for patient entity with userId and match password
         val patient: Patient? = patientDao.getPatientByUserId(userId = userId).firstOrNull()
@@ -44,7 +44,7 @@ class UserRepository {
         return Result.success("Login successful")
     }
 
-    suspend fun register(userId: Int, password: String): Result<String> {
+    suspend fun register(userId: String, password: String): Result<String> {
 
         // query for patient entity with userId and match password
         val patient: Patient? = patientDao.getPatientByUserId(userId = userId).firstOrNull()
@@ -65,6 +65,6 @@ class UserRepository {
     }
 
     fun logout() {
-        currentUserId.value = null
+        currentUser.value = null
     }
 }

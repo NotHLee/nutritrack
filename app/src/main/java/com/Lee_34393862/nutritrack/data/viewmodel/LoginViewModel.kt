@@ -1,6 +1,11 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.entities.Patient
@@ -12,19 +17,28 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val patientRepository: PatientRepository, userRepository: UserRepository) : ViewModel() {
+class LoginViewModel(private val patientRepository: PatientRepository, private val userRepository: UserRepository) : ViewModel() {
 
-    private var _patients = MutableStateFlow<List<Patient>>(emptyList())
-    val patients: StateFlow<List<Patient>> get() = _patients.asStateFlow()
+    // store patients as flow such that it observes the db for changes
+    private var _patientIds = MutableStateFlow<List<String>>(emptyList())
+    val patientIds: StateFlow<List<String>> get() = _patientIds.asStateFlow()
 
-    suspend fun loadPatients() {
+    // ui state variables
+    var loginSheetExpanded by mutableStateOf<Boolean>(false)
+    var loginSheetDropdownExpanded by mutableStateOf<Boolean>(false)
+    var userId by mutableStateOf<String>("")
+    var password by mutableStateOf<String>("")
+
+
+    init {
         viewModelScope.launch {
-            var test = patientRepository.getAllPatients()
-            _patients = patientRepository.getAllPatients()
+            patientRepository.getAllPatientIds().collect { patientIds ->
+                _patientIds.value = patientIds
+            }
         }
     }
 
-
-
-
+    suspend fun login(): Result<String> {
+        return userRepository.authenticate(userId, password)
+    }
 }

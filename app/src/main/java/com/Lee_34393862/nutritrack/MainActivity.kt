@@ -9,14 +9,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.datasource.CsvDataSource
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
-import com.Lee_34393862.nutritrack.ui.Dashboard
 import com.Lee_34393862.nutritrack.ui.LoginScreen
-import com.Lee_34393862.nutritrack.ui.QuestionScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.launch
 
@@ -52,7 +49,7 @@ class MainActivity : ComponentActivity() {
                     composable(Screens.Login.route) {
                         LoginScreen(
                             navController = navController,
-                            loginViewModel = LoginViewModel(
+                            viewModel = LoginViewModel(
                                 patientRepository = patientRepository,
                                 userRepository = userRepository
                             )
