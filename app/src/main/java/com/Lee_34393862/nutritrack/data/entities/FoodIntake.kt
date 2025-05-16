@@ -16,7 +16,7 @@ import androidx.room.PrimaryKey
     tableName = "foodintake")
 data class FoodIntake (
     @PrimaryKey
-    val userId: Int,
+    val userId: String,
     val persona: String = "",
     val biggestMealTime: String = "",
     val sleepTime: String = "",

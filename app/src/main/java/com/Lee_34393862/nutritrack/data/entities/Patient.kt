@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 data class Patient(
 
     @PrimaryKey
-    val userId: Int,
+    val userId: String,
     val name: String = "",
     val password: String = "",
     val phoneNumber: String = "",

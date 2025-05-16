@@ -43,10 +43,8 @@ object CsvDataSource {
             var patientData: Map<String, String> = mapOf()
             lines.forEach { line ->
                 val values = line.split(",")
-                Log.d("test", values.toString())
                 patientData = header.zip(values).toMap()
                 var patient = mapToPatient(patientData)
-                Log.d("patient", patient.toString())
                 database.patientDao().insert(patient = patient)
                 database.foodIntakeDao().insert(foodIntake = FoodIntake(userId = patient.userId))
             }
@@ -61,7 +59,7 @@ object CsvDataSource {
         return Patient(
             name = "", // Assuming 'name' is not in the CSV based on the original code
             phoneNumber = entry["PhoneNumber"] ?: "",
-            userId = entry["User_ID"]?.toInt() ?: 0,
+            userId = entry["User_ID"]?: "",
             sex = entry["Sex"] ?: "",
             heifaTotalScoreMale = entry["HEIFAtotalscoreMale"]?.toDouble() ?: 0.0,
             heifaTotalScoreFemale = entry["HEIFAtotalscoreFemale"]?.toDouble() ?: 0.0,
