@@ -2,6 +2,7 @@ package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,18 +18,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val patientRepository: PatientRepository, private val userRepository: UserRepository) : ViewModel() {
+class LoginViewModel(
+    private val patientRepository: PatientRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     // store patients as flow such that it observes the db for changes
     private var _patientIds = MutableStateFlow<List<String>>(emptyList())
     val patientIds: StateFlow<List<String>> get() = _patientIds.asStateFlow()
-
-    // ui state variables
-    var loginSheetExpanded by mutableStateOf<Boolean>(false)
-    var loginSheetDropdownExpanded by mutableStateOf<Boolean>(false)
-    var userId by mutableStateOf<String>("")
-    var password by mutableStateOf<String>("")
-
 
     init {
         viewModelScope.launch {
@@ -38,7 +35,7 @@ class LoginViewModel(private val patientRepository: PatientRepository, private v
         }
     }
 
-    suspend fun login(): Result<String> {
+    suspend fun login(userId: String, password: String): Result<String> {
         return userRepository.authenticate(userId, password)
     }
 }

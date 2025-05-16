@@ -1,5 +1,6 @@
 package com.Lee_34393862.nutritrack.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -66,26 +68,45 @@ fun LoginScreen(
     viewModel: LoginViewModel,
     navController: NavHostController,
 ) {
-
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
 
-        // login sheet
+        // ui states
+        val patientIds = viewModel.patientIds.collectAsState().value
         val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
+            skipPartiallyExpanded = true,
         )
-        if (viewModel.loginSheetExpanded) {
+        val scope = rememberCoroutineScope()
+        val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+        var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
+        var userId by remember { mutableStateOf<String>("") }
+        var password by remember { mutableStateOf<String>("") }
+
+        // login screen bottom sheet
+        if (sheetState.isVisible) {
             ModalBottomSheet(
                 sheetState = sheetState,
-                onDismissRequest = { viewModel.loginSheetExpanded = false },
-                ) {
+                onDismissRequest = {
+                    scope.launch {
+                        sheetState.hide()
+                    }
+                }
+            ) {
                 LoginSheet(
                     navController = navController,
-                    viewModel = viewModel
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    userId = userId,
+                    onUserIdChange = { userId = it },
+                    password = password,
+                    onPasswordChange = { password = it },
+                    patientIds = patientIds,
+                    onLogin = { userId, password -> viewModel.login(userId, password) }
                 )
             }
         }
+
 
         // main content
         Box(modifier = Modifier.fillMaxSize()) {
@@ -111,7 +132,9 @@ fun LoginScreen(
                 DisclaimerText()
                 Button(
                     onClick = {
-                        viewModel.loginSheetExpanded = true
+                        scope.launch {
+                            sheetState.show()
+                        }
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -208,13 +231,21 @@ fun ClickableLink() {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginSheet(
     navController: NavHostController,
-    viewModel: LoginViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+    userId: String,
+    onUserIdChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    patientIds: List<String>,
+    onLogin: suspend (String, String) -> Result<String>
 ) {
-    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-    val scope: CoroutineScope = rememberCoroutineScope()
+
+    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
 
     Scaffold(
         snackbarHost = {
@@ -237,18 +268,18 @@ fun LoginSheet(
             Spacer(modifier = Modifier.size(16.dp))
 
             CustomDropdownSelector(
-                items = viewModel.patientIds.collectAsState().value,
+                items = patientIds,
                 label = "My ID (Provided by your clinician)",
-                expanded = viewModel.loginSheetDropdownExpanded,
-                onExpandedChange = { viewModel.loginSheetDropdownExpanded = it },
-                value = viewModel.userId,
-                onValueChange = { viewModel.userId = it },
+                expanded = loginSheetDropdownExpanded,
+                onExpandedChange = { loginSheetDropdownExpanded = it },
+                value = userId,
+                onValueChange = { onUserIdChange(it) },
             )
 
             Spacer(modifier = Modifier.size(16.dp))
             TextField(
-                value = viewModel.password,
-                onValueChange = { viewModel.password = it },
+                value = password,
+                onValueChange = { onPasswordChange(it) },
                 label = { Text("Phone Number") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -263,7 +294,7 @@ fun LoginSheet(
             Button(
                 onClick = {
                     scope.launch {
-                        viewModel.login()
+                        onLogin(userId, password)
                             .onSuccess { _ ->
                                 navController.navigate(Screens.Question.route)
                             }
