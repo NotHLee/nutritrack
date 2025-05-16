@@ -48,7 +48,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
-import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
+import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
+
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +60,7 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun LoginScreen(
-    patientRepository: PatientRepository,
+    loginViewModel: LoginViewModel,
     navController: NavHostController,
 ) {
 

@@ -5,6 +5,7 @@ import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 class PatientRepository {
 
@@ -26,6 +27,6 @@ class PatientRepository {
         patientDao.deleteAllPatients()
     }
 
-    fun getAllPatients(): Flow<List<Patient>?> = patientDao.getAllPatients()
+    fun getAllPatients(): StateFlow<List<Patient>?> = patientDao.getAllPatients()
 
 }

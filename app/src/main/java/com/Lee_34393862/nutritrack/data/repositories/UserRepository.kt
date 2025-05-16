@@ -9,11 +9,6 @@ import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 
-data class User(
-    val userId: Int,
-    val password: String,
-)
-
 class UserRepository {
 
     var patientDao: PatientDao
