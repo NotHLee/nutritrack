@@ -9,11 +9,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.datasource.CsvDataSource
+import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.ui.LoginScreen
+import com.Lee_34393862.nutritrack.ui.QuestionScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.launch
 
@@ -31,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         // launch a coroutine to populate db (assuming db is never populated)
         lifecycleScope.launch {
-            // AppDatabase.getDatabase(context = this@MainActivity).patientDao().deleteAllPatients()
+            AppDatabase.getDatabase(context = this@MainActivity).patientDao().deleteAllPatients()
             CsvDataSource.parseCSV(context = this@MainActivity)
         }
 
@@ -41,6 +45,7 @@ class MainActivity : ComponentActivity() {
                 val navController: NavHostController = rememberNavController()
                 val userRepository: UserRepository = UserRepository(context = this@MainActivity)
                 val patientRepository: PatientRepository = PatientRepository(context = this@MainActivity)
+                val foodIntakeRepository: FoodIntakeRepository = FoodIntakeRepository(context = this@MainActivity)
 
                 NavHost(
                     navController = navController,
@@ -56,12 +61,15 @@ class MainActivity : ComponentActivity() {
 
                         )
                     }
-//                    composable(Screens.Question.route) {
-//                        QuestionScreen(
-//                            navController = navController,
-//                            patientRepository = patientRepository
-//                        )
-//                    }
+                    composable(Screens.Question.route) {
+                        QuestionScreen(
+                            navController = navController,
+                            viewModel = QuestionsViewModel(
+                                foodIntakeRepository = foodIntakeRepository,
+                                userRepository = userRepository
+                            )
+                        )
+                    }
 //                    composable(Screens.Dashboard.route) {
 //                        Dashboard(
 //                            patientRepository = patientRepository,

@@ -79,7 +79,6 @@ fun LoginScreen(
         )
         val scope = rememberCoroutineScope()
         val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-        var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
         var userId by remember { mutableStateOf<String>("") }
         var password by remember { mutableStateOf<String>("") }
 

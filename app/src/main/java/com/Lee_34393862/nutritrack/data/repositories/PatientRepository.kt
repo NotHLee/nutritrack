@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class PatientRepository {
 
-    var patientDao: PatientDao
+    val patientDao: PatientDao
 
     constructor(context: Context) {
         patientDao = AppDatabase.getDatabase(context).patientDao()

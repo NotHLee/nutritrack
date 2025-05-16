@@ -23,11 +23,8 @@ interface FoodIntakeDao {
     suspend fun delete(foodIntake: FoodIntake)
 
     @Query("SELECT * FROM foodintake WHERE userId = :userId LIMIT 1")
-    fun getPatientByUserId(userId: Int): Flow<FoodIntake?>
+    fun getFoodIntakeByUserId(userId: String): Flow<FoodIntake?>
 
     @Query("DELETE FROM foodintake")
     suspend fun deleteAllFoodIntake()
-
-    @Query("SELECT * FROM foodintake ORDER BY userId ASC")
-    fun getAllFoodIntake(): Flow<List<FoodIntake>?>
 }

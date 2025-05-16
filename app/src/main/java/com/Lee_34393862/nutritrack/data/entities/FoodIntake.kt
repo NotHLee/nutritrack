@@ -18,9 +18,9 @@ data class FoodIntake (
     @PrimaryKey
     val userId: String,
     val persona: String = "",
-    val biggestMealTime: String = "",
-    val sleepTime: String = "",
-    val wakeUpTime: String = "",
+    val biggestMealTime: String = "00:00",
+    val sleepTime: String = "00:00",
+    val wakeUpTime: String = "00:00",
     val fruits: Boolean = false,
     val redMeat: Boolean = false,
     val fish: Boolean = false,

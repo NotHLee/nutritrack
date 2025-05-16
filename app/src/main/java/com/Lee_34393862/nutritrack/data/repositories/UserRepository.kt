@@ -14,7 +14,7 @@ class UserRepository {
     var patientDao: PatientDao
     var foodIntakeDao: FoodIntakeDao
 
-    // hold current userId as state flow
+    // cache current user for quick access
     val currentUser = MutableStateFlow<Patient?>(null)
 
     constructor(context: Context) {
@@ -41,6 +41,7 @@ class UserRepository {
             return Result.failure(Exception("Password does not match"))
         }
 
+        currentUser.value = patient
         return Result.success("Login successful")
     }
 
