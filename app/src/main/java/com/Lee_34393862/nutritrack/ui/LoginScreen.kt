@@ -1,6 +1,5 @@
 package com.Lee_34393862.nutritrack.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
@@ -20,18 +23,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Shapes
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,22 +47,20 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
-import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
-
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Composable
@@ -76,28 +73,66 @@ fun LoginScreen(
     val patientIds = viewModel.patientIds.collectAsState().value
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    var userId by remember { mutableStateOf<String>("") }
-    var password by remember { mutableStateOf<String>("") }
+    var registerMode by remember { mutableStateOf<Boolean>(false) }
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
-            LoginSheet(
-                navController = navController,
-                scope = scope,
-                userId = userId,
-                onUserIdChange = { userId = it },
-                password = password,
-                onPasswordChange = { password = it },
-                patientIds = patientIds,
-                onLogin = { userId, password -> viewModel.login(userId, password) },
-                onError = { error -> bottomSheetScaffoldState.snackbarHostState.showSnackbar(error) }
-            )
+            if (registerMode)
+                RegisterSheet (
+                    scope = scope,
+                    patientIds = patientIds,
+                    onLogin = { registerMode = false },
+                    onRegister = { userId,
+                                   phoneNumber,
+                                   password,
+                                   confirmPassword
+                        -> viewModel.register(userId, phoneNumber, password, confirmPassword) },
+                    onSuccess = { success ->
+                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
+                            message = success,
+                            actionLabel = "success",
+                            duration = SnackbarDuration.Short
+                        )
+                    },
+                    onError = { error ->
+                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
+                            message = error,
+                            actionLabel = "error",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                )
+            else {
+                LoginSheet(
+                    navController = navController,
+                    scope = scope,
+                    patientIds = patientIds,
+                    onLogin = { userId, password -> viewModel.login(userId, password) },
+                    onRegister = { registerMode = true },
+                    onError = { error ->
+                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
+                            message = error,
+                            actionLabel = "error",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                )
+            }
         },
         sheetPeekHeight = 0.dp,
         snackbarHost = {
             SnackbarHost(hostState = bottomSheetScaffoldState.snackbarHostState) { data ->
-                CustomErrorSnackBar(data.visuals.message)
+                data.visuals.actionLabel?.let { label ->
+                    if (label == "success") {
+                        CustomSuccessSnackBar(data.visuals.message)
+                    } else {
+                        CustomErrorSnackBar(data.visuals.message)
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -154,21 +189,20 @@ fun LoginScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginSheet(
     navController: NavHostController,
     scope: CoroutineScope,
-    userId: String,
-    onUserIdChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
     patientIds: List<String>,
     onLogin: suspend (String, String) -> Result<String>,
+    onRegister: () -> Unit,
     onError: suspend (String) -> Unit
 ) {
 
     var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
+    var userId by remember { mutableStateOf<String>("") }
+    var password by remember { mutableStateOf<String>("") }
+    var passwordVisible by remember { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -181,24 +215,34 @@ fun LoginSheet(
             fontSize = 24.sp
         )
         Spacer(modifier = Modifier.size(16.dp))
-
         CustomDropdownSelector(
             items = patientIds,
             label = "My ID (Provided by your clinician)",
             expanded = loginSheetDropdownExpanded,
             onExpandedChange = { loginSheetDropdownExpanded = it },
             value = userId,
-            onValueChange = { onUserIdChange(it) },
+            onValueChange = { userId = it },
         )
-
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
             value = password,
-            onValueChange = { onPasswordChange(it) },
-            label = { Text("Phone Number") },
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            trailingIcon = {
+                IconButton(
+                    onClick = { passwordVisible = !passwordVisible }
+                ) {
+                    when (passwordVisible) {
+                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
+                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
+                    }
+                }
+            }
         )
         Text(
             text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
@@ -220,6 +264,11 @@ fun LoginSheet(
             }
         ) {
             Text("Continue")
+        }
+        Button(
+            onClick = { onRegister() }
+        ) {
+            Text("Register")
         }
     }
 }
@@ -312,6 +361,145 @@ fun CustomErrorSnackBar(
                 message,
                 style = MaterialTheme.typography.bodyLarge,
             )
+        }
+    }
+}
+
+@Composable
+fun CustomSuccessSnackBar(
+    message: String
+) {
+    Snackbar(containerColor = Color.Green) {
+        Row (
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Bottom
+        ){
+            Icon(
+                Icons.Rounded.CheckCircle,
+                contentDescription = "success",
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+    }
+}
+
+@Composable
+fun RegisterSheet(
+    scope: CoroutineScope,
+    patientIds: List<String>,
+    onLogin: () -> Unit,
+    onRegister: suspend (String, String, String, String) -> Result<String>,
+    onSuccess: suspend (String) -> Unit,
+    onError: suspend (String) -> Unit
+) {
+    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
+    var userId by remember { mutableStateOf<String>("") }
+    var phoneNumber by remember { mutableStateOf<String>("") }
+    var password by remember { mutableStateOf<String>("") }
+    var confirmPassword by remember { mutableStateOf<String>("") }
+    var passwordVisible by remember { mutableStateOf<Boolean>(false) }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Register",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        CustomDropdownSelector(
+            items = patientIds,
+            label = "My ID (Provided by your clinician)",
+            expanded = loginSheetDropdownExpanded,
+            onExpandedChange = { loginSheetDropdownExpanded = it },
+            value = userId,
+            onValueChange = { userId = it },
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        TextField(
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
+            label = { Text("Phone Number") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            trailingIcon = {
+                IconButton(
+                    onClick = { passwordVisible = !passwordVisible }
+                ) {
+                    when (passwordVisible) {
+                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
+                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
+                    }
+                }
+            }
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        TextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            trailingIcon = {
+                IconButton(
+                    onClick = { passwordVisible = !passwordVisible }
+                ) {
+                    when (passwordVisible) {
+                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
+                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
+                    }
+                }
+            }
+        )
+        Text(
+            text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .padding(16.dp)
+        )
+        Button(
+            onClick = {
+                scope.launch {
+                    onRegister(userId, phoneNumber, password, confirmPassword)
+                        .onSuccess { success ->
+                           onSuccess(success)
+                        }
+                        .onFailure { error ->
+                            error.message?.let { onError(it) }
+                        }
+                }
+            }
+        ) {
+            Text("Register")
+        }
+        Button(
+            onClick = {
+                onLogin()
+            }
+        ) {
+            Text("Login")
         }
     }
 }

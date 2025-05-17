@@ -1,9 +1,7 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

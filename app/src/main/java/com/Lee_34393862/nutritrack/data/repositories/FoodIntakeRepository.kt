@@ -1,10 +1,6 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
 import android.content.Context
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.FoodIntakeDao
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake

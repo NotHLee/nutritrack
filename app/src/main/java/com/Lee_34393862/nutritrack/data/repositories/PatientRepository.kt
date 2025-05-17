@@ -5,7 +5,6 @@ import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 class PatientRepository {
 

@@ -63,9 +63,9 @@ class UserRepository {
         return Result.success("Login successful")
     }
 
-    suspend fun register(userId: String, password: String): Result<String> {
+    suspend fun register(userId: String, phoneNumber: String, password: String, confirmPassword: String): Result<String> {
 
-        // query for patient entity with userId and match password
+        // query for patient entity with userId
         val patient: Patient? = patientDao.getPatientByUserId(userId = userId).firstOrNull()
 
         // null means user does not exist
@@ -76,6 +76,20 @@ class UserRepository {
         // non null password means this account has been claimed
         if (patient.password.isNotEmpty()) {
             return Result.failure(Exception("User id has been claimed"))
+        }
+
+        // match phone number
+        if (patient.phoneNumber != phoneNumber) {
+            return Result.failure(Exception("Incorrect phone number"))
+        }
+
+        // ensure password is not empty
+        if (password.isEmpty()) {
+            return Result.failure(Exception("Password cannot be empty"))
+        }
+
+        if (password != confirmPassword) {
+            return Result.failure(Exception("Passwords do not match"))
         }
 
         patientDao.update(patient.copy(password = password))

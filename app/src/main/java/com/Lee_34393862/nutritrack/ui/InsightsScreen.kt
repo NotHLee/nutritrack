@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,11 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomLabelledProgressBar
 import com.Lee_34393862.nutritrack.shared.CustomProgressBar
-import androidx.compose.runtime.getValue
 
 data class FoodScore(val name: String, val score: Float, val scoreMax: Float)
 

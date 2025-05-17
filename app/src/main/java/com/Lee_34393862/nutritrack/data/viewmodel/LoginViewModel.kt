@@ -1,18 +1,9 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
-import android.content.Context
-import android.util.Log
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,5 +28,9 @@ class LoginViewModel(
 
     suspend fun login(userId: String, password: String): Result<String> {
         return userRepository.authenticate(userId, password)
+    }
+
+    suspend fun register(userId: String, phoneNumber: String, password: String, confirmPassword: String): Result<String> {
+        return userRepository.register(userId, phoneNumber, password, confirmPassword)
     }
 }

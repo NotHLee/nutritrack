@@ -1,7 +1,6 @@
 package com.Lee_34393862.nutritrack.ui
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,11 +50,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
-import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
-import kotlinx.coroutines.flow.first
 import java.time.LocalTime
 
 data class Persona(val name: String, val description: String, val picture: Int, var isExpanded: Boolean = false)

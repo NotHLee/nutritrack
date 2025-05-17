@@ -9,7 +9,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.datasource.CsvDataSource
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
@@ -25,6 +24,7 @@ import kotlinx.coroutines.launch
 sealed class Screens(val route: String) {
     data object Login: Screens("login")
     data object Question: Screens("question")
+    data object Register: Screens("register")
     data object Dashboard: Screens("dashboard")
 }
 
@@ -44,9 +44,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             NutritrackTheme {
                 val navController: NavHostController = rememberNavController()
-                val userRepository: UserRepository = UserRepository(context = this@MainActivity)
-                val patientRepository: PatientRepository = PatientRepository(context = this@MainActivity)
-                val foodIntakeRepository: FoodIntakeRepository = FoodIntakeRepository(context = this@MainActivity)
+                val userRepository = UserRepository(context = this@MainActivity)
+                val patientRepository = PatientRepository(context = this@MainActivity)
+                val foodIntakeRepository = FoodIntakeRepository(context = this@MainActivity)
 
                 NavHost(
                     navController = navController,
