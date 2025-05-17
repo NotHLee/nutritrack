@@ -25,6 +25,7 @@ import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.screen.HomeScreen
 
 sealed class DashboardScreens(
@@ -79,13 +80,13 @@ fun Dashboard(
                     navigateToInsights = { navController.navigate(DashboardScreens.Insights.route) }
                 )
             }
-//            composable(route = DashboardScreens.Insights.route) {
-//                InsightsScreen(
-//                    innerPadding,
-//                    patientRepository = patientRepository,
-//                    navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
-//                )
-//            }
+            composable(route = DashboardScreens.Insights.route) {
+                InsightsScreen(
+                    innerPadding,
+                    viewModel = InsightsViewModel(userRepository = userRepository),
+                    navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
+                )
+            }
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(innerPadding)
             }
