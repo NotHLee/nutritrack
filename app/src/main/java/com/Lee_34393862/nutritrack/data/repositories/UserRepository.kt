@@ -66,7 +66,6 @@ class UserRepository {
         // set initial value after successful auth
         _currentUser.value = patientToUser(patient)
         _isLogin.value = true
-        Log.d("user repo", isLogin.value.toString())
         return Result.success("Login successful")
     }
 

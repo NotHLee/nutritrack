@@ -24,6 +24,7 @@ import com.Lee_34393862.nutritrack.ui.QuestionScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
 import kotlinx.coroutines.flow.collectLatest
 
 sealed class Screens(val route: String) {
@@ -41,16 +42,16 @@ class MainActivity : ComponentActivity() {
         // launch a coroutine to populate db (assuming db is never populated)
         lifecycleScope.launch {
             // AppDatabase.getDatabase(context = this@MainActivity).patientDao().deleteAllPatients()
-            CsvDataSource.parseCSV(context = this@MainActivity)
+            CsvDataSource.parseCSV(context = applicationContext)
         }
 
         enableEdgeToEdge()
         setContent {
             NutritrackTheme {
                 val navController: NavHostController = rememberNavController()
-                val userRepository = UserRepository(context = this@MainActivity)
-                val patientRepository = PatientRepository(context = this@MainActivity)
-                val foodIntakeRepository = FoodIntakeRepository(context = this@MainActivity)
+                val userRepository = UserRepository(context = applicationContext)
+                val patientRepository = PatientRepository(context = applicationContext)
+                val foodIntakeRepository = FoodIntakeRepository(context = applicationContext)
 
                 NavHost(
                     navController = navController,

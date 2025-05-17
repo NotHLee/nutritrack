@@ -31,6 +31,9 @@ import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 import com.Lee_34393862.nutritrack.screen.HomeScreen
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 
 sealed class DashboardScreens(
     val route: String,
@@ -67,8 +70,12 @@ fun Dashboard(
     navigateToLogin: () -> Unit,
 ) {
 
+    val scope = rememberCoroutineScope()
     val navController: NavHostController = rememberNavController()
     val isLogin by userRepository.isLogin.collectAsState()
+
+    // pre load FruityViceRepository to cache fruit suggestions upon login
+    val fruityViceRepository = FruityViceRepository(scope = scope)
 
     // observe the login status and redirect the user back to login if logged out
     LaunchedEffect(isLogin) {
@@ -99,7 +106,10 @@ fun Dashboard(
                 )
             }
             composable(route = DashboardScreens.Nutritrack.route) {
-                NutritrackScreen(innerPadding)
+                NutritrackScreen(
+                    innerPadding,
+                    viewModel = NutritrackViewModel(fruityViceRepository = fruityViceRepository)
+                )
             }
             composable(route = DashboardScreens.Settings.route) {
                 SettingsScreen(
