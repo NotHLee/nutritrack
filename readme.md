@@ -82,19 +82,19 @@
   - [x] Configure database access via Repository → ViewModel pattern
 
 ## 2. Login System Changes
-- [ ] Implement account claiming flow
-  - [ ] Validate UserID + PhoneNumber against database (not CSV)
-  - [ ] Allow users to set password and add name (stored in DB)
-  - [ ] Require only UserID + password for subsequent logins
+- [x] Implement account claiming flow
+  - [x] Validate UserID + PhoneNumber against database (not CSV)
+  - [x] Allow users to set password and add name (stored in DB)
+  - [x] Require only UserID + password for subsequent logins
 - [ ] Add persistent login (keep user logged in after app restart)
 - [ ] Support user logout functionality
 
 ## 3. Core Screens
 
 ### 3.1. Welcome/Login Screen (Updated)
-- [ ] Update login functionality to work with database instead of CSV
-- [ ] Implement first-time user flow (account claiming)
-- [ ] Add password field for returning users
+- [x] Update login functionality to work with database instead of CSV
+- [x] Implement first-time user flow (account claiming)
+- [x] Add password field for returning users
 
 ### 3.2. Settings Screen
 - [ ] Create Settings screen (accessible from bottom nav)
@@ -102,9 +102,9 @@
 - [ ] Add Logout button
 
 ### 3.3. Existing Screens (from Assignment 1)
-- [ ] Refactor Food Intake Questionnaire to save to database
-- [ ] Update Home Screen to pull data from database
-- [ ] Refactor Insights Screen to use ViewModel for data access
+- [x] Refactor Food Intake Questionnaire to save to database
+- [x] Update Home Screen to pull data from database
+- [x] Refactor Insights Screen to use ViewModel for data access
 
 ## 4. NutriCoach Screen
 - [ ] Create NutriCoach screen (accessible from Insights screen or bottom nav)
@@ -133,7 +133,7 @@
 - [ ] Set up Retrofit + coroutines for asynchronous network requests
 
 ## 7. Technical Requirements
-- [ ] Ensure CSV is used only once to populate Room DB
+- [x] Ensure CSV is used only once to populate Room DB
 - [ ] Implement adaptive UI for different screen sizes
 - [ ] Declare all GenAI usage in line with Monash policy
 - [ ] Prepare for coding interview in Week 12 lab
