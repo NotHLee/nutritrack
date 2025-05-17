@@ -1,5 +1,6 @@
 package com.Lee_34393862.nutritrack.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -11,6 +12,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -25,7 +28,9 @@ import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 import com.Lee_34393862.nutritrack.screen.HomeScreen
+import androidx.compose.runtime.getValue
 
 sealed class DashboardScreens(
     val route: String,
@@ -58,10 +63,17 @@ sealed class DashboardScreens(
 @Composable
 fun Dashboard(
     userRepository: UserRepository,
-    navigateToQuestion: () -> Unit
+    navigateToQuestion: () -> Unit,
+    navigateToLogin: () -> Unit,
 ) {
 
     val navController: NavHostController = rememberNavController()
+    val isLogin by userRepository.isLogin.collectAsState()
+
+    // observe the login status and redirect the user back to login if logged out
+    LaunchedEffect(isLogin) {
+        if (!isLogin) navigateToLogin()
+    }
 
     Scaffold (
         bottomBar = { DashboardBottomBar(navController) }
@@ -90,7 +102,10 @@ fun Dashboard(
                 NutritrackScreen(innerPadding)
             }
             composable(route = DashboardScreens.Settings.route) {
-                SettingsScreen(innerPadding)
+                SettingsScreen(
+                    innerPadding,
+                    viewModel = SettingsViewModel(userRepository = userRepository)
+                )
             }
         }
     }

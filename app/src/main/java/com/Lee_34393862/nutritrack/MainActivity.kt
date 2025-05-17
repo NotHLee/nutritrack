@@ -1,9 +1,12 @@
 package com.Lee_34393862.nutritrack
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,11 +23,12 @@ import com.Lee_34393862.nutritrack.ui.LoginScreen
 import com.Lee_34393862.nutritrack.ui.QuestionScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.flow.collectLatest
 
 sealed class Screens(val route: String) {
     data object Login: Screens("login")
     data object Question: Screens("question")
-    data object Register: Screens("register")
     data object Dashboard: Screens("dashboard")
 }
 
@@ -74,7 +78,15 @@ class MainActivity : ComponentActivity() {
                     composable(Screens.Dashboard.route) {
                         Dashboard(
                             userRepository = userRepository,
-                            navigateToQuestion = { navController.navigate(Screens.Question.route) }
+                            navigateToQuestion = { navController.navigate(Screens.Question.route) },
+                            navigateToLogin = { navController.navigate(Screens.Login.route) {
+                                // clear back stack up to login page
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                                // avoid multiple copies of the same destination
+                                launchSingleTop = true
+                            } }
                         )
                     }
                 }

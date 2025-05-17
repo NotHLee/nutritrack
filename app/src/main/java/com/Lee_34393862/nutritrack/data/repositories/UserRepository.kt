@@ -1,6 +1,7 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
 import android.content.Context
+import android.util.Log
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.FoodIntakeDao
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
@@ -25,6 +26,10 @@ class UserRepository {
     // cache current user for quick access globally
     private var _currentUser = MutableStateFlow<User?>(null)
     val currentUser = _currentUser.asStateFlow()
+
+    // flag to determine login status
+    private var _isLogin = MutableStateFlow<Boolean>(false)
+    var isLogin = _isLogin.asStateFlow()
 
     constructor(context: Context) {
         patientDao = AppDatabase.getDatabase(context = context).patientDao()
@@ -60,6 +65,8 @@ class UserRepository {
 
         // set initial value after successful auth
         _currentUser.value = patientToUser(patient)
+        _isLogin.value = true
+        Log.d("user repo", isLogin.value.toString())
         return Result.success("Login successful")
     }
 
@@ -100,6 +107,7 @@ class UserRepository {
     fun logout() {
         currentUserJob?.cancel()        // make sure to stop observing after current user logs out
         _currentUser.value = null
+        _isLogin.value = false
     }
 
     fun patientToUser(patient: Patient): User {

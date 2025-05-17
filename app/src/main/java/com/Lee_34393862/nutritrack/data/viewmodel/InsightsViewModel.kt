@@ -8,5 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 class InsightsViewModel(
     private val userRepository: UserRepository
 ): ViewModel() {
+    // TODO: explicitly write every attribute out as a stateflow, passing the entire user is bad practice
     val currentUser: StateFlow<User?> get() = userRepository.currentUser
 }
