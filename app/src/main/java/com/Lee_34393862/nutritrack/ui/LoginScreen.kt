@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,12 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -68,45 +72,35 @@ fun LoginScreen(
     viewModel: LoginViewModel,
     navController: NavHostController,
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-    ) { innerPadding ->
 
-        // ui states
-        val patientIds = viewModel.patientIds.collectAsState().value
-        val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-        val scope = rememberCoroutineScope()
-        val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-        var userId by remember { mutableStateOf<String>("") }
-        var password by remember { mutableStateOf<String>("") }
+    val patientIds = viewModel.patientIds.collectAsState().value
+    val scope = rememberCoroutineScope()
+    val bottomSheetScaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    var userId by remember { mutableStateOf<String>("") }
+    var password by remember { mutableStateOf<String>("") }
 
-        // login screen bottom sheet
-        if (sheetState.isVisible) {
-            ModalBottomSheet(
-                sheetState = sheetState,
-                onDismissRequest = {
-                    scope.launch {
-                        sheetState.hide()
-                    }
-                }
-            ) {
-                LoginSheet(
-                    navController = navController,
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    userId = userId,
-                    onUserIdChange = { userId = it },
-                    password = password,
-                    onPasswordChange = { password = it },
-                    patientIds = patientIds,
-                    onLogin = { userId, password -> viewModel.login(userId, password) }
-                )
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            LoginSheet(
+                navController = navController,
+                scope = scope,
+                userId = userId,
+                onUserIdChange = { userId = it },
+                password = password,
+                onPasswordChange = { password = it },
+                patientIds = patientIds,
+                onLogin = { userId, password -> viewModel.login(userId, password) },
+                onError = { error -> bottomSheetScaffoldState.snackbarHostState.showSnackbar(error) }
+            )
+        },
+        sheetPeekHeight = 0.dp,
+        snackbarHost = {
+            SnackbarHost(hostState = bottomSheetScaffoldState.snackbarHostState) { data ->
+                CustomErrorSnackBar(data.visuals.message)
             }
         }
-
-
+    ) { innerPadding ->
         // main content
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -132,7 +126,7 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            sheetState.show()
+                            bottomSheetScaffoldState.bottomSheetState.expand()
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -156,6 +150,76 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .padding(bottom = 32.dp)
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginSheet(
+    navController: NavHostController,
+    scope: CoroutineScope,
+    userId: String,
+    onUserIdChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    patientIds: List<String>,
+    onLogin: suspend (String, String) -> Result<String>,
+    onError: suspend (String) -> Unit
+) {
+
+    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Login",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+
+        CustomDropdownSelector(
+            items = patientIds,
+            label = "My ID (Provided by your clinician)",
+            expanded = loginSheetDropdownExpanded,
+            onExpandedChange = { loginSheetDropdownExpanded = it },
+            value = userId,
+            onValueChange = { onUserIdChange(it) },
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+        TextField(
+            value = password,
+            onValueChange = { onPasswordChange(it) },
+            label = { Text("Phone Number") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+        Text(
+            text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .padding(16.dp)
+        )
+        Button(
+            onClick = {
+                scope.launch {
+                    onLogin(userId, password)
+                        .onSuccess { _ ->
+                            navController.navigate(Screens.Question.route)
+                        }
+                        .onFailure { error ->
+                            error.message?.let { onError(it) }
+                        }
+                }
+            }
+        ) {
+            Text("Continue")
         }
     }
 }
@@ -228,85 +292,6 @@ fun ClickableLink() {
         style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center),
         modifier = Modifier.fillMaxWidth()
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginSheet(
-    navController: NavHostController,
-    scope: CoroutineScope,
-    snackbarHostState: SnackbarHostState,
-    userId: String,
-    onUserIdChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    patientIds: List<String>,
-    onLogin: suspend (String, String) -> Result<String>
-) {
-
-    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
-
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                CustomErrorSnackBar(data.visuals.message)
-            }
-        }
-    )
-    { innerPadding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Login",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            CustomDropdownSelector(
-                items = patientIds,
-                label = "My ID (Provided by your clinician)",
-                expanded = loginSheetDropdownExpanded,
-                onExpandedChange = { loginSheetDropdownExpanded = it },
-                value = userId,
-                onValueChange = { onUserIdChange(it) },
-            )
-
-            Spacer(modifier = Modifier.size(16.dp))
-            TextField(
-                value = password,
-                onValueChange = { onPasswordChange(it) },
-                label = { Text("Phone Number") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Text(
-                text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-            Button(
-                onClick = {
-                    scope.launch {
-                        onLogin(userId, password)
-                            .onSuccess { _ ->
-                                navController.navigate(Screens.Question.route)
-                            }
-                            .onFailure { error ->
-                                error.message?.let { snackbarHostState.showSnackbar(it) }
-                            }
-                    }
-                }
-            ) {
-                Text("Continue")
-            }
-        }
-    }
 }
 
 @Composable
