@@ -21,6 +21,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
+import com.Lee_34393862.nutritrack.data.viewmodel.LoginScreenState
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
@@ -70,7 +72,8 @@ fun LoginScreen(
     navController: NavHostController,
 ) {
 
-    val patientIds = viewModel.patientIds.collectAsState().value
+    val patientIds by viewModel.patientIds.collectAsState()
+    val isLoadingState by viewModel.isLoadingState.collectAsState()
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     var registerMode by remember { mutableStateOf<Boolean>(false) }
@@ -82,6 +85,7 @@ fun LoginScreen(
                 RegisterSheet (
                     scope = scope,
                     patientIds = patientIds,
+                    isLoadingState = isLoadingState,
                     onLogin = { registerMode = false },
                     onRegister = { userId,
                                    phoneNumber,
@@ -110,6 +114,7 @@ fun LoginScreen(
                     navController = navController,
                     scope = scope,
                     patientIds = patientIds,
+                    isLoadingState = isLoadingState,
                     onLogin = { userId, password -> viewModel.login(userId, password) },
                     onRegister = { registerMode = true },
                     onError = { error ->
@@ -158,20 +163,26 @@ fun LoginScreen(
                     tint = Color.Unspecified
                 )
                 DisclaimerText()
-                Button(
-                    onClick = {
-                        scope.launch {
-                            bottomSheetScaffoldState.bottomSheetState.expand()
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(48.dp)
-                ) {
-                    Text("Login")
+
+                // only allow user to press login when all user ids are loaded
+                if (isLoadingState == LoginScreenState.InitialLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                bottomSheetScaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .height(48.dp)
+                    ) {
+                        Text("Login")
+                    }
                 }
             }
             Text(
@@ -194,6 +205,7 @@ fun LoginSheet(
     navController: NavHostController,
     scope: CoroutineScope,
     patientIds: List<String>,
+    isLoadingState: LoginScreenState,
     onLogin: suspend (String, String) -> Result<String>,
     onRegister: () -> Unit,
     onError: suspend (String) -> Unit
@@ -250,25 +262,30 @@ fun LoginSheet(
             modifier = Modifier
                 .padding(16.dp)
         )
-        Button(
-            onClick = {
-                scope.launch {
-                    onLogin(userId, password)
-                        .onSuccess { _ ->
-                            navController.navigate(Screens.Question.route)
-                        }
-                        .onFailure { error ->
-                            error.message?.let { onError(it) }
-                        }
+
+        if (isLoadingState == LoginScreenState.LoginLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    scope.launch {
+                        onLogin(userId, password)
+                            .onSuccess { _ ->
+                                navController.navigate(Screens.Question.route)
+                            }
+                            .onFailure { error ->
+                                error.message?.let { onError(it) }
+                            }
+                    }
                 }
+            ) {
+                Text("Continue")
             }
-        ) {
-            Text("Continue")
-        }
-        Button(
-            onClick = { onRegister() }
-        ) {
-            Text("Register")
+            Button(
+                onClick = { onRegister() }
+            ) {
+                Text("Register")
+            }
         }
     }
 }
@@ -391,6 +408,7 @@ fun CustomSuccessSnackBar(
 fun RegisterSheet(
     scope: CoroutineScope,
     patientIds: List<String>,
+    isLoadingState: LoginScreenState,
     onLogin: () -> Unit,
     onRegister: suspend (String, String, String, String) -> Result<String>,
     onSuccess: suspend (String) -> Unit,
@@ -479,27 +497,31 @@ fun RegisterSheet(
             modifier = Modifier
                 .padding(16.dp)
         )
-        Button(
-            onClick = {
-                scope.launch {
-                    onRegister(userId, phoneNumber, password, confirmPassword)
-                        .onSuccess { success ->
-                           onSuccess(success)
-                        }
-                        .onFailure { error ->
-                            error.message?.let { onError(it) }
-                        }
+        if (isLoadingState == LoginScreenState.RegisterLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    scope.launch {
+                        onRegister(userId, phoneNumber, password, confirmPassword)
+                            .onSuccess { success ->
+                                onSuccess(success)
+                            }
+                            .onFailure { error ->
+                                error.message?.let { onError(it) }
+                            }
+                    }
                 }
+            ) {
+                Text("Register")
             }
-        ) {
-            Text("Register")
-        }
-        Button(
-            onClick = {
-                onLogin()
+            Button(
+                onClick = {
+                    onLogin()
+                }
+            ) {
+                Text("Login")
             }
-        ) {
-            Text("Login")
         }
     }
 }
