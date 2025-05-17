@@ -75,11 +75,11 @@
 # NutriTrack Pro App Checklist - Assignment 3
 
 ## 1. Database Setup
-- [ ] Move all CSV data into Room database
-  - [ ] Set up Patient table with UserID, PhoneNumber, Name, Sex, and all scores
-  - [ ] Create FoodIntake table with foreign key to Patient table
-  - [ ] Load data from CSV on first launch only
-  - [ ] Configure database access via Repository → ViewModel pattern
+- [x] Move all CSV data into Room database
+  - [x] Set up Patient table with UserID, PhoneNumber, Name, Sex, and all scores
+  - [x] Create FoodIntake table with foreign key to Patient table
+  - [x] Load data from CSV on first launch only
+  - [x] Configure database access via Repository → ViewModel pattern
 
 ## 2. Login System Changes
 - [ ] Implement account claiming flow
