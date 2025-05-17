@@ -87,7 +87,7 @@
   - [x] Allow users to set password and add name (stored in DB)
   - [x] Require only UserID + password for subsequent logins
 - [ ] Add persistent login (keep user logged in after app restart)
-- [ ] Support user logout functionality
+- [x] Support user logout functionality
 
 ## 3. Core Screens
 
@@ -97,9 +97,9 @@
 - [x] Add password field for returning users
 
 ### 3.2. Settings Screen
-- [ ] Create Settings screen (accessible from bottom nav)
-- [ ] Display logged-in user info (name, phone number)
-- [ ] Add Logout button
+- [x] Create Settings screen (accessible from bottom nav)
+- [x] Display logged-in user info (name, phone number)
+- [x] Add Logout button
 
 ### 3.3. Existing Screens (from Assignment 1)
 - [x] Refactor Food Intake Questionnaire to save to database
