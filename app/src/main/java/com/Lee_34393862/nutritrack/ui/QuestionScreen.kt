@@ -225,7 +225,7 @@ fun QuestionScreen(
                 HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
                 Button(
                     onClick = {
-                        //navController.navigate("dashboard")
+                        navController.navigate("dashboard")
                         viewModel.savePreference(
                             fruits = foodList[0].checked,
                             redMeat = foodList[1].checked,

@@ -23,6 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.screen.HomeScreen
 
 sealed class DashboardScreens(
@@ -55,7 +57,7 @@ sealed class DashboardScreens(
 
 @Composable
 fun Dashboard(
-    patientRepository: PatientRepository,
+    userRepository: UserRepository,
     navigateToQuestion: () -> Unit
 ) {
 
@@ -72,18 +74,18 @@ fun Dashboard(
             composable(route = DashboardScreens.Home.route) {
                 HomeScreen(
                     innerPadding,
-                    patientRepository = patientRepository,
+                    viewModel = HomeViewModel(userRepository = userRepository),
                     navigateToQuestion = { navigateToQuestion() },
                     navigateToInsights = { navController.navigate(DashboardScreens.Insights.route) }
                 )
             }
-            composable(route = DashboardScreens.Insights.route) {
-                InsightsScreen(
-                    innerPadding,
-                    patientRepository = patientRepository,
-                    navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
-                )
-            }
+//            composable(route = DashboardScreens.Insights.route) {
+//                InsightsScreen(
+//                    innerPadding,
+//                    patientRepository = patientRepository,
+//                    navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
+//                )
+//            }
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(innerPadding)
             }

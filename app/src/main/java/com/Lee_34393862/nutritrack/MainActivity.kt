@@ -16,6 +16,7 @@ import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
+import com.Lee_34393862.nutritrack.ui.Dashboard
 import com.Lee_34393862.nutritrack.ui.LoginScreen
 import com.Lee_34393862.nutritrack.ui.QuestionScreen
 import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
         // launch a coroutine to populate db (assuming db is never populated)
         lifecycleScope.launch {
-            AppDatabase.getDatabase(context = this@MainActivity).patientDao().deleteAllPatients()
+            // AppDatabase.getDatabase(context = this@MainActivity).patientDao().deleteAllPatients()
             CsvDataSource.parseCSV(context = this@MainActivity)
         }
 
@@ -70,12 +71,12 @@ class MainActivity : ComponentActivity() {
                             )
                         )
                     }
-//                    composable(Screens.Dashboard.route) {
-//                        Dashboard(
-//                            patientRepository = patientRepository,
-//                            navigateToQuestion = { navController.navigate(Screens.Question.route) }
-//                        )
-//                    }
+                    composable(Screens.Dashboard.route) {
+                        Dashboard(
+                            userRepository = userRepository,
+                            navigateToQuestion = { navController.navigate(Screens.Question.route) }
+                        )
+                    }
                 }
             }
         }

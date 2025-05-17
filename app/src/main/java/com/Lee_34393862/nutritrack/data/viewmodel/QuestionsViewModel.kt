@@ -2,24 +2,17 @@ package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
-import com.Lee_34393862.nutritrack.ui.Food
-import com.Lee_34393862.nutritrack.ui.Persona
-import com.Lee_34393862.nutritrack.ui.TimeBox
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 

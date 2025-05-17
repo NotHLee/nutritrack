@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,20 +40,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
+import androidx.compose.runtime.getValue
 
 @Composable
 fun HomeScreen(
     innerPadding: PaddingValues,
-    patientRepository: PatientRepository,
+    viewModel: HomeViewModel,
     navigateToQuestion: () -> Unit,
     navigateToInsights: () -> Unit
 ) {
+
+    val currentUserName by viewModel.currentUserName.collectAsState()
+    val currentUserTotalFoodScore by viewModel.currentUserTotalFoodScore.collectAsState()
+
     Column(
         modifier = Modifier.padding(16.dp).padding(innerPadding)
     ) {
         Greetings(
-            userId = patientRepository.queryPatientData("User_ID").getOrDefault("Rosie"),
+            name = currentUserName,
             navigateToEdit = { navigateToQuestion() }
         )
         Image(
@@ -62,7 +68,7 @@ fun HomeScreen(
             modifier = Modifier.height(256.dp)
         )
         MyScore(
-            foodScore = patientRepository.getTotalFoodScore(),
+            foodScore = currentUserTotalFoodScore.toString(),
             navigateToInsights = { navigateToInsights() }
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -72,7 +78,7 @@ fun HomeScreen(
 
 @Composable
 fun Greetings(
-    userId: String,
+    name: String,
     navigateToEdit: () -> Unit
 ) {
     Text(
@@ -83,7 +89,7 @@ fun Greetings(
         color = Color.Gray
     )
     Text(
-        userId,
+        name,
         style = MaterialTheme.typography.headlineLarge,
         fontWeight = FontWeight.Bold,
         fontSize = 48.sp
