@@ -59,7 +59,10 @@ import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomErrorSnackBar
 import com.Lee_34393862.nutritrack.shared.CustomPasswordTextField
+import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
 import com.Lee_34393862.nutritrack.shared.CustomSuccessSnackBar
+import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
+import com.Lee_34393862.nutritrack.shared.showSuccessSnackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -94,19 +97,15 @@ fun LoginScreen(
                      },
                     onSuccess = { success ->
                         registerMode = false
-                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
-                            message = success,
-                            actionLabel = "success",
-                            duration = SnackbarDuration.Short
+                        showSuccessSnackbar(
+                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                            message = success
                         )
                     },
                     onError = { error ->
-                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
-                            message = error,
-                            actionLabel = "error",
-                            duration = SnackbarDuration.Short
+                        showErrorSnackbar(
+                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                            message = error
                         )
                     }
                 )
@@ -119,11 +118,9 @@ fun LoginScreen(
                     onLogin = { userId, password -> viewModel.login(userId, password) },
                     onRegister = { registerMode = true },
                     onError = { error ->
-                        bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-                        bottomSheetScaffoldState.snackbarHostState.showSnackbar(
-                            message = error,
-                            actionLabel = "error",
-                            duration = SnackbarDuration.Short
+                        showErrorSnackbar(
+                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                            message = error
                         )
                     }
                 )
@@ -131,15 +128,7 @@ fun LoginScreen(
         },
         sheetPeekHeight = 0.dp,
         snackbarHost = {
-            SnackbarHost(hostState = bottomSheetScaffoldState.snackbarHostState) { data ->
-                data.visuals.actionLabel?.let { label ->
-                    if (label == "success") {
-                        CustomSuccessSnackBar(data.visuals.message)
-                    } else {
-                        CustomErrorSnackBar(data.visuals.message)
-                    }
-                }
-            }
+            CustomSnackbarHost(snackbarHostState = bottomSheetScaffoldState.snackbarHostState)
         }
     ) { innerPadding ->
         // main content
