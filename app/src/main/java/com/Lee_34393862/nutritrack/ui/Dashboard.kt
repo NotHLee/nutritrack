@@ -10,6 +10,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,10 +33,12 @@ import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 import com.Lee_34393862.nutritrack.screen.HomeScreen
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
 import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
+import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
 
 sealed class DashboardScreens(
     val route: String,
@@ -74,6 +78,7 @@ fun Dashboard(
 
     val scope = rememberCoroutineScope()
     val navController: NavHostController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
     val isLogin by userRepository.isLogin.collectAsState()
 
     // pre load FruityViceRepository to cache fruit suggestions upon login
@@ -84,10 +89,9 @@ fun Dashboard(
         if (!isLogin) navigateToLogin()
     }
 
-    Log.d("Dashboard","rerender")
-
     Scaffold (
-        bottomBar = { DashboardBottomBar(navController) }
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        bottomBar = { DashboardBottomBar(navController) },
     ){ innerPadding ->
         NavHost(
             navController = navController,
@@ -122,6 +126,7 @@ fun Dashboard(
             composable(route = DashboardScreens.Settings.route) {
                 SettingsScreen(
                     innerPadding,
+                    snackbarHostState = snackbarHostState,
                     viewModel = SettingsViewModel(userRepository = userRepository)
                 )
             }
