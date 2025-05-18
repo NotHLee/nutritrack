@@ -46,10 +46,15 @@ class LoginViewModel(
         }
     }
 
-    suspend fun register(userId: String, phoneNumber: String, password: String, confirmPassword: String): Result<String> {
+    suspend fun register(userId: String,
+                         name: String,
+                         phoneNumber: String,
+                         password: String,
+                         confirmPassword: String
+    ): Result<String> {
         try {
             _isLoadingState.value = LoginScreenState.RegisterLoading
-            return userRepository.register(userId, phoneNumber, password, confirmPassword)
+            return userRepository.register(userId, name, phoneNumber, password, confirmPassword)
         } finally {
             _isLoadingState.value = LoginScreenState.Idle
         }

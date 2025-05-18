@@ -69,7 +69,7 @@ class UserRepository {
         return Result.success("Login successful")
     }
 
-    suspend fun register(userId: String, phoneNumber: String, password: String, confirmPassword: String): Result<String> {
+    suspend fun register(userId: String, name: String, phoneNumber: String, password: String, confirmPassword: String): Result<String> {
 
         // query for patient entity with userId
         val patient: Patient? = patientDao.getPatientByUserId(userId = userId).firstOrNull()
@@ -89,16 +89,22 @@ class UserRepository {
             return Result.failure(Exception("Incorrect phone number"))
         }
 
+        // ensure name is not empty
+        if (name.isEmpty()) {
+            return Result.failure(Exception("Name cannot be empty"))
+        }
+
         // ensure password is not empty
         if (password.isEmpty()) {
             return Result.failure(Exception("Password cannot be empty"))
         }
 
+        // ensure password and confirm password are the same
         if (password != confirmPassword) {
             return Result.failure(Exception("Passwords do not match"))
         }
 
-        patientDao.update(patient.copy(password = password))
+        patientDao.update(patient.copy(name = name, password = password))
         return Result.success("User id successfully claimed")
 
     }

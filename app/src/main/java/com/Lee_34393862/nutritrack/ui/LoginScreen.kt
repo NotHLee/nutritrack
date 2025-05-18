@@ -88,11 +88,14 @@ fun LoginScreen(
                     isLoadingState = isLoadingState,
                     onLogin = { registerMode = false },
                     onRegister = { userId,
+                                   name,
                                    phoneNumber,
                                    password,
-                                   confirmPassword
-                        -> viewModel.register(userId, phoneNumber, password, confirmPassword) },
+                                   confirmPassword ->
+                        viewModel.register(userId, name, phoneNumber, password, confirmPassword)
+                     },
                     onSuccess = { success ->
+                        registerMode = false
                         bottomSheetScaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
                         bottomSheetScaffoldState.snackbarHostState.showSnackbar(
                             message = success,
@@ -410,12 +413,13 @@ fun RegisterSheet(
     patientIds: List<String>,
     isLoadingState: LoginScreenState,
     onLogin: () -> Unit,
-    onRegister: suspend (String, String, String, String) -> Result<String>,
+    onRegister: suspend (String, String, String, String, String) -> Result<String>,
     onSuccess: suspend (String) -> Unit,
     onError: suspend (String) -> Unit
 ) {
     var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
     var userId by remember { mutableStateOf<String>("") }
+    var name by remember { mutableStateOf<String>("") }
     var phoneNumber by remember { mutableStateOf<String>("") }
     var password by remember { mutableStateOf<String>("") }
     var confirmPassword by remember { mutableStateOf<String>("") }
@@ -439,6 +443,15 @@ fun RegisterSheet(
             onExpandedChange = { loginSheetDropdownExpanded = it },
             value = userId,
             onValueChange = { userId = it },
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        TextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Name") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
@@ -503,7 +516,7 @@ fun RegisterSheet(
             Button(
                 onClick = {
                     scope.launch {
-                        onRegister(userId, phoneNumber, password, confirmPassword)
+                        onRegister(userId, name, phoneNumber, password, confirmPassword)
                             .onSuccess { success ->
                                 onSuccess(success)
                             }
