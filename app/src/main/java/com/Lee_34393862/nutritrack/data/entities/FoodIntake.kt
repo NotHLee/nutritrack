@@ -5,7 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 /**
- * Represent a response
+ * Represent the responses in the FoodIntake screen
  */
 @Entity(
     foreignKeys = [ForeignKey(entity = Patient::class,

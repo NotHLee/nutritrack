@@ -47,13 +47,14 @@ fun CustomSearchBar(
 
     Box(
         modifier
-            .fillMaxSize()
             .semantics { isTraversalGroup = true }
+            .fillMaxWidth()
     ) {
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .semantics { traversalIndex = 0f },
+            shadowElevation = 6.dp,
             query = query,
             onQueryChange = onQueryChange,
             onSearch = {

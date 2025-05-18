@@ -20,8 +20,8 @@ class FruityViceRepository(
     private val apiService: FruityViceAPIService = FruityViceAPIService.create()
 
     // cache fruit name suggestions for search bar in nutritrack
-    private var _fruitNameSuggestions = MutableStateFlow<List<String>>(emptyList())
-    val fruitNameSuggestions: StateFlow<List<String>> = _fruitNameSuggestions.asStateFlow()
+    private var _fruitNameSuggestions = MutableStateFlow<List<FruitSuggestion>>(emptyList())
+    val fruitNameSuggestions: StateFlow<List<FruitSuggestion>> = _fruitNameSuggestions.asStateFlow()
 
     init {
         scope.launch {
@@ -33,18 +33,20 @@ class FruityViceRepository(
         val fruits: List<FruityViceResponseModel>? = apiService.getAllFruit().body()
         Log.d("fruits", fruits.toString())
         if (!fruits.isNullOrEmpty()) {
-            _fruitNameSuggestions.value = fruits.map { fruit -> fruit.name }.sorted()
+            _fruitNameSuggestions.value = fruits.map { fruit ->
+                FruitSuggestion(fruit.id, fruit.name)
+            }.sortedBy { it.name }
         }
     }
 
-    suspend fun getFruit(fruitName: String): Result<FruityViceResponseModel> {
-        val fruit: FruityViceResponseModel? = apiService.getFruit(fruitName).body()
+    suspend fun getFruit(fruitId: Int): Result<FruityViceResponseModel> {
+        val fruit: FruityViceResponseModel? = apiService.getFruit(fruitId).body()
 
         return when (fruit) {
             null -> Result.failure(Exception("Fruit does not exist"))
             else -> Result.success(fruit)
         }
-
     }
-
 }
+
+data class FruitSuggestion(val id: Int, val name: String)

@@ -33,6 +33,7 @@ import com.Lee_34393862.nutritrack.screen.HomeScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
+import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 
 sealed class DashboardScreens(
@@ -66,6 +67,7 @@ sealed class DashboardScreens(
 @Composable
 fun Dashboard(
     userRepository: UserRepository,
+    messageRepository: MessageRepository,
     navigateToQuestion: () -> Unit,
     navigateToLogin: () -> Unit,
 ) {
@@ -81,6 +83,8 @@ fun Dashboard(
     LaunchedEffect(isLogin) {
         if (!isLogin) navigateToLogin()
     }
+
+    Log.d("Dashboard","rerender")
 
     Scaffold (
         bottomBar = { DashboardBottomBar(navController) }
@@ -108,7 +112,11 @@ fun Dashboard(
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(
                     innerPadding,
-                    viewModel = NutritrackViewModel(fruityViceRepository = fruityViceRepository)
+                    viewModel = NutritrackViewModel(
+                        userRepository = userRepository,
+                        fruityViceRepository = fruityViceRepository,
+                        messageRepository = messageRepository
+                    )
                 )
             }
             composable(route = DashboardScreens.Settings.route) {

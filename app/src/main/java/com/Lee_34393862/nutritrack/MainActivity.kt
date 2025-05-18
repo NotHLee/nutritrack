@@ -25,6 +25,7 @@ import com.Lee_34393862.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
+import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
 import kotlinx.coroutines.flow.collectLatest
 
 sealed class Screens(val route: String) {
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
                 val userRepository = UserRepository(context = applicationContext)
                 val patientRepository = PatientRepository(context = applicationContext)
                 val foodIntakeRepository = FoodIntakeRepository(context = applicationContext)
+                val messageRepository = MessageRepository(context = applicationContext)
 
                 NavHost(
                     navController = navController,
@@ -79,6 +81,7 @@ class MainActivity : ComponentActivity() {
                     composable(Screens.Dashboard.route) {
                         Dashboard(
                             userRepository = userRepository,
+                            messageRepository = messageRepository,
                             navigateToQuestion = { navController.navigate(Screens.Question.route) },
                             navigateToLogin = { navController.navigate(Screens.Login.route) {
                                 // clear back stack up to login page

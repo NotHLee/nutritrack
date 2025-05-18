@@ -8,8 +8,11 @@ import retrofit2.http.Path
 
 interface FruityViceAPIService {
 
-    @GET("api/fruit/{fruitName}")
-    suspend fun getFruit(@Path("fruitName") fruitName: String): Response<FruityViceResponseModel>
+    // id will be used because we already cached the name and ids initially
+    // and there is bug where some fruits cannot be found using its name directly
+    // for example: Ceylon Gooseberry
+    @GET("api/fruit/{fruitId}")
+    suspend fun getFruit(@Path("fruitId") fruitId: Int): Response<FruityViceResponseModel>
 
     @GET("api/fruit/all")
     suspend fun getAllFruit(): Response<List<FruityViceResponseModel>>
