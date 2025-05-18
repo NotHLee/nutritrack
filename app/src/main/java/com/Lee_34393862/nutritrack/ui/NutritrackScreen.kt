@@ -36,10 +36,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import coil3.compose.AsyncImage
+import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
+import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -50,8 +56,8 @@ fun NutritrackScreen(
     innerPadding: PaddingValues,
     viewModel: NutritrackViewModel,
 ) {
-
     val scope = rememberCoroutineScope()
+    val isOptimalFruitScore by viewModel.isOptimalFruitScore.collectAsState()
     val fruitSuggestions by viewModel.fruitNameSuggestions.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
     val currentMotivationalMessage by viewModel.currentMotivationalMessage.collectAsState()
@@ -82,13 +88,13 @@ fun NutritrackScreen(
             } ?: emptyList()
         }
     }
-    var messageHistoryDialog by remember { mutableStateOf<Boolean>(false) }
+    var isMessageHistoryDialogOpen by remember { mutableStateOf<Boolean>(false) }
 
     // dialog to show message history
-    if (messageHistoryDialog) {
+    if (isMessageHistoryDialogOpen) {
         MessageHistoryDialog(
             motivationalMessages = motivationalMessages,
-            onDismissRequest = { messageHistoryDialog = false }
+            onDismissRequest = { isMessageHistoryDialogOpen = false }
         )
     }
 
@@ -97,98 +103,28 @@ fun NutritrackScreen(
             .padding(innerPadding)
             .fillMaxSize()
     ){
-        CustomSearchBar(
-            query = query,
-            onQueryChange = { query = it },
-            onSearch = { currentQuery ->
-                scope.launch {
-                    viewModel.searchFruit(
-                        fruitSuggestions.find { fruitSuggestion ->
-                            fruitSuggestion.name == currentQuery
-                        }?.id ?: -1
-                    )
-                }
-            },
-            onResultClick = { result ->
-                query = result
-                scope.launch {
-                    viewModel.searchFruit(
-                        fruitSuggestions.find { fruitSuggestion ->
-                            fruitSuggestion.name == result
-                        }?.id ?: -1
-                    )
-                }
-            },
-            searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name }
-        )
-        Spacer(modifier = Modifier.size(24.dp))
-        when (fruitDetails) {
-            null ->
-                Card(
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.5f)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "No fruit is selected",
-                            modifier = Modifier
-                                .padding(16.dp)
-                        )
-                    }
-                }
-            else ->
-                Card(
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.5f)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            fruitDetails!!.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        // first 3 details about plant info
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            fruitDetailsTexts.take(3).forEach { details ->
-                                Row {
-                                    Text("${details.label}:", modifier = Modifier.fillMaxWidth(0.3f))
-                                    Text(details.value)
-                                }
-                            }
-                        }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp))
-                        Text(
-                            "Nutritional Values",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        // remaining details about nutrition
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            fruitDetailsTexts.drop(3).forEach { details ->
-                                Row {
-                                    Text("${details.label}:", modifier = Modifier.fillMaxWidth(0.5f))
-                                    Text(details.value)
-                                }
-                            }
-                        }
-                    }
-                }
+        when (isOptimalFruitScore) {
+            true -> AsyncImage(
+                model = "https://picsum.photos/800/600",
+                contentDescription = "Random Image",
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 16.dp)
+                    .fillMaxWidth()
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+            )
+            false -> FruitSearchSection(
+                scope = scope,
+                viewModel = viewModel,
+                query = query,
+                fruitSuggestions = fruitSuggestions,
+                filteredFruitSuggestions = filteredFruitSuggestions,
+                fruitDetailsTexts = fruitDetailsTexts,
+                fruitDetails = fruitDetails,
+                onQueryChange = { query = it },
+                onResultChange = { query = it }
+            )
         }
         Spacer(modifier = Modifier.size(16.dp))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
@@ -228,7 +164,7 @@ fun NutritrackScreen(
             }
         }
         Button(
-            onClick = { messageHistoryDialog = true },
+            onClick = { isMessageHistoryDialogOpen = true },
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             modifier = Modifier
@@ -307,3 +243,119 @@ fun MessageHistoryDialog(
     }
 }
 
+@Composable
+fun FruitSearchSection(
+    scope: CoroutineScope,
+    viewModel: NutritrackViewModel,
+    query: String,
+    fruitSuggestions: List<FruitSuggestion>,
+    filteredFruitSuggestions: List<FruitSuggestion>,
+    fruitDetailsTexts: List<FruitDetailsText>,
+    fruitDetails: FruityViceResponseModel?,
+    onQueryChange: (String) -> Unit,
+    onResultChange: (String) -> Unit,
+) {
+    CustomSearchBar(
+        query = query,
+        onQueryChange = { onQueryChange(it) },
+        onSearch = { currentQuery ->
+            scope.launch {
+                viewModel.searchFruit(
+                    fruitSuggestions.find { fruitSuggestion ->
+                        fruitSuggestion.name == currentQuery
+                    }?.id ?: -1
+                )
+            }
+        },
+        onResultClick = { result ->
+            onResultChange(result)
+            scope.launch {
+                viewModel.searchFruit(
+                    fruitSuggestions.find { fruitSuggestion ->
+                        fruitSuggestion.name == result
+                    }?.id ?: -1
+                )
+            }
+        },
+        searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name }
+    )
+    Spacer (modifier = Modifier.size(24.dp))
+    when (fruitDetails) {
+        null ->
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "No fruit is selected",
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+                }
+            }
+        else ->
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        fruitDetails!!.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    // first 3 details about plant info
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        fruitDetailsTexts.take(3).forEach { details ->
+                            Row {
+                                Text(
+                                    "${details.label}:",
+                                    modifier = Modifier.fillMaxWidth(0.3f)
+                                )
+                                Text(details.value)
+                            }
+                        }
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(
+                            vertical = 16.dp,
+                            horizontal = 8.dp
+                        )
+                    )
+                    Text(
+                        "Nutritional Values",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    // remaining details about nutrition
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        fruitDetailsTexts.drop(3).forEach { details ->
+                            Row {
+                                Text(
+                                    "${details.label}:",
+                                    modifier = Modifier.fillMaxWidth(0.5f)
+                                )
+                                Text(details.value)
+                            }
+                        }
+                    }
+                }
+            }
+    }
+}

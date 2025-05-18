@@ -24,17 +24,24 @@ class NutritrackViewModel(
 
     private val genAIService = GenAIService()
     val fruitNameSuggestions: StateFlow<List<FruitSuggestion>> = fruityViceRepository.fruitNameSuggestions
-    private val _fruitDetails=  MutableStateFlow<FruityViceResponseModel?>(null)
+    private val _isOptimalFruitScore = MutableStateFlow<Boolean>(false)
+    private val _fruitDetails = MutableStateFlow<FruityViceResponseModel?>(null)
     private val _currentMotivationalMessage = MutableStateFlow<String?>(null)
     private val _motivationalMessages = MutableStateFlow<List<String>>(emptyList())
     val fruitDetails: StateFlow<FruityViceResponseModel?> = _fruitDetails.asStateFlow()
     val currentMotivationalMessage: StateFlow<String?> = _currentMotivationalMessage.asStateFlow()
     val motivationalMessages: StateFlow<List<String>> = _motivationalMessages.asStateFlow()
+    val isOptimalFruitScore: StateFlow<Boolean> = _isOptimalFruitScore.asStateFlow()
 
     init {
         viewModelScope.launch {
             userRepository.currentUser.collect { user ->
                 if (user != null) {
+                    // fruit score is only optimal if fruit heifa score is the max
+                    if (user.fruitHeifaScore >= 10.0) {
+                        _isOptimalFruitScore.value = true
+                    }
+                    // get messages from the db
                     messageRepository.getMessagesByUserId(user.userId).collect { messages ->
                         if (messages != null) {
                             // reversed so it is sorted from latest to oldest
