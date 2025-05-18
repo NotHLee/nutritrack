@@ -3,7 +3,6 @@ package com.Lee_34393862.nutritrack.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,8 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
@@ -26,7 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
@@ -61,7 +57,9 @@ import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginScreenState
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
-import com.Lee_34393862.nutritrack.ui.theme.errorContainerDark
+import com.Lee_34393862.nutritrack.shared.CustomErrorSnackBar
+import com.Lee_34393862.nutritrack.shared.CustomPasswordTextField
+import com.Lee_34393862.nutritrack.shared.CustomSuccessSnackBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -364,50 +362,6 @@ fun ClickableLink() {
 }
 
 @Composable
-fun CustomErrorSnackBar(
-    message: String
-) {
-    Snackbar(containerColor = errorContainerDark) {
-        Row (
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
-        ){
-            Icon(
-                Icons.Rounded.Clear,
-                contentDescription = "error",
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(
-                message,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-    }
-}
-
-@Composable
-fun CustomSuccessSnackBar(
-    message: String
-) {
-    Snackbar(containerColor = Color.Green) {
-        Row (
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
-        ){
-            Icon(
-                Icons.Rounded.CheckCircle,
-                contentDescription = "success",
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(
-                message,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-    }
-}
-
-@Composable
 fun RegisterSheet(
     scope: CoroutineScope,
     patientIds: List<String>,
@@ -424,6 +378,7 @@ fun RegisterSheet(
     var password by remember { mutableStateOf<String>("") }
     var confirmPassword by remember { mutableStateOf<String>("") }
     var passwordVisible by remember { mutableStateOf<Boolean>(false) }
+    var confirmPasswordVisible by remember { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -463,46 +418,18 @@ fun RegisterSheet(
                 .padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            trailingIcon = {
-                IconButton(
-                    onClick = { passwordVisible = !passwordVisible }
-                ) {
-                    when (passwordVisible) {
-                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
-                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
-                    }
-                }
-            }
+        CustomPasswordTextField(
+            password = password,
+            onPasswordChange = { password = it },
+            passwordVisible = passwordVisible,
+            onToggleVisiblity = { passwordVisible = !passwordVisible }
         )
         Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            trailingIcon = {
-                IconButton(
-                    onClick = { passwordVisible = !passwordVisible }
-                ) {
-                    when (passwordVisible) {
-                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
-                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
-                    }
-                }
-            }
+        CustomPasswordTextField(
+            password = confirmPassword,
+            onPasswordChange = { confirmPassword = it },
+            passwordVisible = confirmPasswordVisible,
+            onToggleVisiblity = { confirmPasswordVisible = !confirmPasswordVisible }
         )
         Text(
             text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
