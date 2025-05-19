@@ -57,8 +57,7 @@ fun NutritrackScreen(
     viewModel: NutritrackViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    val isOptimalFruitScore by viewModel.isOptimalFruitScore.collectAsState()
-    val fruitSuggestions by viewModel.fruitNameSuggestions.collectAsState()
+    val fruitSuggestions by viewModel.fruitSuggestion.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
     val currentMotivationalMessage by viewModel.currentMotivationalMessage.collectAsState()
     val motivationalMessages by viewModel.motivationalMessages.collectAsState()
@@ -103,7 +102,7 @@ fun NutritrackScreen(
             .padding(innerPadding)
             .fillMaxSize()
     ){
-        when (isOptimalFruitScore) {
+        when (fruitSuggestions.isEmpty()) {
             true -> AsyncImage(
                 model = "https://picsum.photos/800/600",
                 contentDescription = "Random Image",
@@ -314,7 +313,7 @@ fun FruitSearchSection(
                         .padding(16.dp)
                 ) {
                     Text(
-                        fruitDetails!!.name,
+                        fruitDetails.name,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )

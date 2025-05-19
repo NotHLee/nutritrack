@@ -1,6 +1,7 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
 import android.content.Context
+import android.util.Log
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.FoodIntakeDao
 import com.Lee_34393862.nutritrack.data.dao.PatientDao
@@ -55,9 +56,8 @@ class UserRepository {
         }
 
         // start observing the user from database for any changes after login
-        // collectLatest is used for fast update (e.g. immediate transition to landing page after logout)
         currentUserJob = repositoryScope.launch {
-            patientDao.getPatientByUserId(userId).collectLatest { patient ->
+            patientDao.getPatientByUserId(userId).collect { patient ->
                 _currentUser.value = patient?.let { patientToUser(it) }
             }
         }

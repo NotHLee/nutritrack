@@ -35,13 +35,14 @@ sealed class DashboardScreens(val route: String) {
 
 @Composable
 fun Dashboard(
-    userRepository: UserRepository,
-    messageRepository: MessageRepository,
+    homeViewModel: HomeViewModel,
+    insightsViewModel: InsightsViewModel,
+    nutritrackViewModel: NutritrackViewModel,
+    settingsViewModel: SettingsViewModel,
     navigateToQuestion: () -> Unit,
     navigateToClinician: () -> Unit,
 ) {
 
-    val scope = rememberCoroutineScope()
     val navController: NavHostController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val bottomBarItems: List<BottomBarItem> = listOf(
@@ -66,10 +67,6 @@ fun Dashboard(
             icon = Icons.Default.Settings
         )
     )
-
-    // pre load FruityViceRepository to cache fruit suggestions upon login
-    val fruityViceRepository = FruityViceRepository(scope = scope)
-
     Scaffold (
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
         bottomBar = { CustomBottomBar(navController = navController, bottomBarItems = bottomBarItems) },
@@ -81,7 +78,7 @@ fun Dashboard(
             composable(route = DashboardScreens.Home.route) {
                 HomeScreen(
                     innerPadding,
-                    viewModel = HomeViewModel(userRepository = userRepository),
+                    viewModel = homeViewModel,
                     navigateToQuestion = { navigateToQuestion() },
                     navigateToInsights = { navController.navigate(DashboardScreens.Insights.route) }
                 )
@@ -89,18 +86,14 @@ fun Dashboard(
             composable(route = DashboardScreens.Insights.route) {
                 InsightsScreen(
                     innerPadding,
-                    viewModel = InsightsViewModel(userRepository = userRepository),
+                    viewModel = insightsViewModel,
                     navigateToNutritrack = { navController.navigate(DashboardScreens.Nutritrack.route) }
                 )
             }
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(
                     innerPadding,
-                    viewModel = NutritrackViewModel(
-                        userRepository = userRepository,
-                        fruityViceRepository = fruityViceRepository,
-                        messageRepository = messageRepository
-                    )
+                    viewModel = nutritrackViewModel
                 )
             }
             composable(route = DashboardScreens.Settings.route) {
@@ -108,7 +101,7 @@ fun Dashboard(
                     innerPadding,
                     snackbarHostState = snackbarHostState,
                     navigateToClinician = { navigateToClinician() },
-                    viewModel = SettingsViewModel(userRepository = userRepository)
+                    viewModel = settingsViewModel,
                 )
             }
         }

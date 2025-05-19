@@ -1,6 +1,8 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
@@ -16,10 +18,9 @@ sealed class LoginScreenState {
     data object RegisterLoading: LoginScreenState()
 }
 
-class LoginViewModel(
-    private val patientRepository: PatientRepository,
-    private val userRepository: UserRepository
-) : ViewModel() {
+class LoginViewModel(context: Context, private val userRepository: UserRepository) : ViewModel() {
+
+    private val patientRepository = PatientRepository(context = context)
 
     // store patients as flow such that it observes the db for changes
     private var _patientIds = MutableStateFlow<List<String>>(emptyList())
@@ -58,5 +59,11 @@ class LoginViewModel(
         } finally {
             _isLoadingState.value = LoginScreenState.Idle
         }
+    }
+
+    class LoginViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+        private val context = context.applicationContext
+        override fun <T: ViewModel> create(modelClass: Class<T>): T =
+            LoginViewModel(context, userRepository) as T
     }
 }

@@ -8,18 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
+import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
 import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.ClinicianViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
+import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
-
-/**
- * This nested navigation manager is following the official documentation way of doing it
- * Advantage of doing it this way is for type safe navigation
- * Source: https://developer.android.com/guide/navigation/design/nested-graphs
- */
+import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 
 // Top-level screens
 sealed class Screens(val route: String) {
@@ -31,10 +30,14 @@ sealed class Screens(val route: String) {
 
 @Composable
 fun NavigationManager(
+    loginViewModel: LoginViewModel,
+    questionsViewModel: QuestionsViewModel,
+    homeViewModel: HomeViewModel,
+    insightsViewModel: InsightsViewModel,
+    nutritrackViewModel: NutritrackViewModel,
+    settingsViewModel: SettingsViewModel,
+    clinicianViewModel: ClinicianViewModel,
     userRepository: UserRepository,
-    patientRepository: PatientRepository,
-    foodIntakeRepository: FoodIntakeRepository,
-    messageRepository: MessageRepository
 ) {
     val navController = rememberNavController()
     val isLogin by userRepository.isLogin.collectAsState()
@@ -56,36 +59,30 @@ fun NavigationManager(
     NavHost(navController = navController, startDestination = Screens.Login.route) {
         composable(route = Screens.Login.route) {
             LoginScreen(
-                viewModel = LoginViewModel(
-                    patientRepository = patientRepository,
-                    userRepository = userRepository
-                ),
-                navigateToQuestions = { navController.navigate(Screens.Dashboard.route) }
+                viewModel = loginViewModel,
+                navigateToQuestions = { navController.navigate(Screens.Questions.route) }
             )
         }
         composable(route = Screens.Questions.route) {
             QuestionScreen(
                 navigateToLogin = { navController.navigate(Screens.Login.route) },
                 navigateToDashboard = { navController.navigate(Screens.Dashboard.route) },
-                viewModel = QuestionsViewModel(
-                    foodIntakeRepository = foodIntakeRepository,
-                    userRepository = userRepository
-                )
+                viewModel = questionsViewModel
             )
         }
         composable(route = Screens.Dashboard.route) {
             Dashboard(
-                userRepository = userRepository,
-                messageRepository = messageRepository,
+                homeViewModel = homeViewModel,
+                insightsViewModel = insightsViewModel,
+                nutritrackViewModel = nutritrackViewModel,
+                settingsViewModel = settingsViewModel,
                 navigateToQuestion = { navController.navigate(Screens.Questions.route) },
                 navigateToClinician = { navController.navigate(Screens.Clinician.route) }
             )
         }
         composable(route = Screens.Clinician.route) {
             ClinicianScreen(
-                viewModel = ClinicianViewModel(
-
-                )
+                viewModel = clinicianViewModel
             )
         }
     }

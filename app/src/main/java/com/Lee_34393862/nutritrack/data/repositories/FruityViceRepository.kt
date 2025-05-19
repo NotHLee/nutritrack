@@ -9,34 +9,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class FruityViceRepository(
-    private val scope: CoroutineScope
-) {
+class FruityViceRepository() {
     private val apiService: FruityViceAPIService = FruityViceAPIService.create()
 
-    // cache fruit name suggestions for search bar in nutritrack
-    private var _fruitNameSuggestions = MutableStateFlow<List<FruitSuggestion>>(emptyList())
-    val fruitNameSuggestions: StateFlow<List<FruitSuggestion>> = _fruitNameSuggestions.asStateFlow()
-
-    init {
-        scope.launch {
-            loadFruitSuggestions()
-        }
-    }
-
-    suspend fun loadFruitSuggestions() {
+    suspend fun getFruitSuggestions(): Result<List<FruitSuggestion>> {
         val fruits: List<FruityViceResponseModel>? = apiService.getAllFruit().body()
-        Log.d("fruits", fruits.toString())
         if (!fruits.isNullOrEmpty()) {
-            _fruitNameSuggestions.value = fruits.map { fruit ->
+            val fruitSuggestions= fruits.map { fruit ->
                 FruitSuggestion(fruit.id, fruit.name)
             }.sortedBy { it.name }
+            return Result.success(fruitSuggestions)
+        } else {
+            return Result.failure(Exception("No fruits suggestions are found"))
         }
     }
 
     suspend fun getFruit(fruitId: Int): Result<FruityViceResponseModel> {
         val fruit: FruityViceResponseModel? = apiService.getFruit(fruitId).body()
-
         return when (fruit) {
             null -> Result.failure(Exception("Fruit does not exist"))
             else -> Result.success(fruit)

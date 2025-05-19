@@ -1,7 +1,9 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.entities.Message
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
@@ -16,32 +18,41 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class NutritrackViewModel(
-    private val userRepository: UserRepository,
-    private val fruityViceRepository: FruityViceRepository,
-    private val messageRepository: MessageRepository
-) : ViewModel() {
+class NutritrackViewModel(context: Context, private val userRepository: UserRepository) : ViewModel() {
+
+    private val fruityViceRepository = FruityViceRepository()
+    private val messageRepository = MessageRepository(context = context)
 
     private val genAIService = GenAIService()
-    val fruitNameSuggestions: StateFlow<List<FruitSuggestion>> = fruityViceRepository.fruitNameSuggestions
-    private val _isOptimalFruitScore = MutableStateFlow<Boolean>(false)
+    private val _fruitSuggestions = MutableStateFlow<List<FruitSuggestion>>(emptyList())
     private val _fruitDetails = MutableStateFlow<FruityViceResponseModel?>(null)
     private val _currentMotivationalMessage = MutableStateFlow<String?>(null)
     private val _motivationalMessages = MutableStateFlow<List<String>>(emptyList())
+    val fruitSuggestion: StateFlow<List<FruitSuggestion>> = _fruitSuggestions.asStateFlow()
     val fruitDetails: StateFlow<FruityViceResponseModel?> = _fruitDetails.asStateFlow()
     val currentMotivationalMessage: StateFlow<String?> = _currentMotivationalMessage.asStateFlow()
     val motivationalMessages: StateFlow<List<String>> = _motivationalMessages.asStateFlow()
-    val isOptimalFruitScore: StateFlow<Boolean> = _isOptimalFruitScore.asStateFlow()
 
     init {
+        Log.d("nutritrack", "nutritarck")
         viewModelScope.launch {
             userRepository.currentUser.collect { user ->
                 if (user != null) {
                     // fruit score is only optimal if fruit heifa score is the max
-                    if (user.fruitHeifaScore >= 10.0) {
-                        _isOptimalFruitScore.value = true
+                    when (user.fruitHeifaScore >= 10.0) {
+                        true -> { }     // nutritrack will load a random image if optimal fruit score
+                        false -> {
+                            // get fruit name suggestions for the custom fruit search bar
+                            fruityViceRepository.getFruitSuggestions()
+                                .onSuccess { suggestions ->
+                                    _fruitSuggestions.value = suggestions
+                                }
+                                .onFailure { error ->
+                                    throw error
+                                }
+                        }
                     }
-                    // get messages from the db
+                    // load messages from the db
                     messageRepository.getMessagesByUserId(user.userId).collect { messages ->
                         if (messages != null) {
                             // reversed so it is sorted from latest to oldest
@@ -57,11 +68,9 @@ class NutritrackViewModel(
     suspend fun searchFruit(fruitId: Int) {
         fruityViceRepository.getFruit(fruitId)
             .onSuccess { fruit ->
-                Log.d("fruit", fruit.toString())
                 _fruitDetails.value = fruit
             }
             .onFailure { error ->
-                Log.d("error", error.message.toString())
                 _fruitDetails.value = null
             }
     }
@@ -93,6 +102,13 @@ class NutritrackViewModel(
                     ) }
                 }
             }
+        }
+    }
+
+    class NutritrackViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+        private val context = context.applicationContext
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return NutritrackViewModel(context, userRepository) as T
         }
     }
 }

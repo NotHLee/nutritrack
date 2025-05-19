@@ -1,25 +1,30 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
-class QuestionsViewModel(
-    private val foodIntakeRepository: FoodIntakeRepository,
-    private val userRepository: UserRepository
-): ViewModel() {
+class QuestionsViewModel(context: Context, private val userRepository: UserRepository): ViewModel() {
+
+    private val foodIntakeRepository = FoodIntakeRepository(context = context)
 
     // store food intake questionnaire responses as flow such that it observes db for changes
     private var _foodIntakeResponses = MutableStateFlow<FoodIntake?>(null)
@@ -59,7 +64,6 @@ class QuestionsViewModel(
        sleepTime: LocalTime,
        wakeUpTime: LocalTime,
     ) {
-        Log.d("another", "clicked")
         viewModelScope.launch {
             foodIntakeRepository.update(
                 FoodIntake(
@@ -79,6 +83,13 @@ class QuestionsViewModel(
                     wakeUpTime = wakeUpTime.toString(),
                 )
             )
+        }
+    }
+
+    class QuestionsViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+        private val context = context.applicationContext
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return QuestionsViewModel(context, userRepository) as T
         }
     }
 

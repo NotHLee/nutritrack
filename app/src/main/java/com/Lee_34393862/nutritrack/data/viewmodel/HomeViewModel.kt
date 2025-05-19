@@ -1,6 +1,8 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,14 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
-    private val userRepository: UserRepository
-): ViewModel() {
+class HomeViewModel(context: Context, private val userRepository: UserRepository): ViewModel() {
 
     // store current user's name and total food score as flow
     private var _currentUserName = MutableStateFlow<String>("")
-    val currentUserName: StateFlow<String> get() = _currentUserName.asStateFlow()
     private var _currentUserTotalFoodScore = MutableStateFlow<Double>(0.0)
+    val currentUserName: StateFlow<String> get() = _currentUserName.asStateFlow()
     val currentUserTotalFoodScore: StateFlow<Double> get() = _currentUserTotalFoodScore.asStateFlow()
 
     // initial loading
@@ -28,5 +28,11 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    class HomeViewModelFactory(context: Context, private val userRepository: UserRepository): ViewModelProvider.Factory {
+        private val context = context.applicationContext
+        override fun <T: ViewModel> create(modelClass: Class<T>): T =
+            HomeViewModel(context, userRepository) as T
     }
 }
