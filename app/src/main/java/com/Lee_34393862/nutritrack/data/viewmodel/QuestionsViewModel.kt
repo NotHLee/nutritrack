@@ -24,6 +24,7 @@ import java.time.LocalTime
 
 class QuestionsViewModel(context: Context, private val userRepository: UserRepository): ViewModel() {
 
+    // TODO: add validation for food intake questionnaire
     private val foodIntakeRepository = FoodIntakeRepository(context = context)
 
     // store food intake questionnaire responses as flow such that it observes db for changes
