@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
         childColumns = arrayOf("userId"),
         onDelete = ForeignKey.CASCADE
     )],
-    tableName = "message")
+    tableName = "nutricoachtips")
 data class Message(
     @PrimaryKey(autoGenerate = true)
     val messageId: Int = 0,

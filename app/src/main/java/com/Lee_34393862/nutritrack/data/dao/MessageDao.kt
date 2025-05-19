@@ -23,9 +23,9 @@ interface MessageDao {
     @Delete
     suspend fun delete(message: Message)
 
-    @Query("SELECT * FROM message WHERE userId = :userId")
+    @Query("SELECT * FROM nutricoachtips WHERE userId = :userId")
     fun getMessagesByUserId(userId: String): Flow<List<Message>?>
 
-    @Query("DELETE FROM message")
+    @Query("DELETE FROM nutricoachtips")
     suspend fun deleteAllMessages()
 }
