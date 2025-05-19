@@ -207,6 +207,7 @@ fun MessageHistoryDialog(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+                Column {
                     Text(
                         "AI Tips",
                         style = MaterialTheme.typography.titleLarge,
@@ -215,7 +216,9 @@ fun MessageHistoryDialog(
                             .padding(16.dp)
                     )
                     LazyColumn(
-                        modifier = Modifier.weight(1f, false)
+                        modifier = Modifier
+                            .weight(1f, false)
+
                     ) {
                         items(motivationalMessages) { message ->
                             Card(
@@ -232,6 +235,7 @@ fun MessageHistoryDialog(
                             }
                         }
                     }
+                }
                 Button(
                     onClick = { onDismissRequest() },
                     shape = RoundedCornerShape(8.dp),
