@@ -1,7 +1,6 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
 import android.content.Context
-import android.util.Log
 import com.Lee_34393862.nutritrack.data.AppDatabase
 import com.Lee_34393862.nutritrack.data.dao.FoodIntakeDao
 import com.Lee_34393862.nutritrack.data.dao.PatientDao

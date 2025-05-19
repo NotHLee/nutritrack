@@ -47,9 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
@@ -62,12 +60,12 @@ data class TimeBox(val question: String, var time: LocalTime = LocalTime.MIDNIGH
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
-    navController: NavHostController,
+    navigateToLogin: () -> Unit,
+    navigateToDashboard: () -> Unit,
     viewModel: QuestionsViewModel,
 ) {
 
     val context: Context = LocalContext.current
-
     val foodIntakeResponses by viewModel.foodIntakeResponses.collectAsState()
     val foodList = remember(foodIntakeResponses) {
         mutableStateListOf<Food>(
@@ -135,7 +133,6 @@ fun QuestionScreen(
         )
     }
 
-
     if (viewModel.isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -155,7 +152,7 @@ fun QuestionScreen(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                navController.navigate(Screens.Login.route)
+                                navigateToLogin()
                             }
                         )
                         {
@@ -222,7 +219,7 @@ fun QuestionScreen(
                 HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
                 Button(
                     onClick = {
-                        navController.navigate("dashboard")
+                        navigateToDashboard()
                         viewModel.savePreference(
                             fruits = foodList[0].checked,
                             redMeat = foodList[1].checked,

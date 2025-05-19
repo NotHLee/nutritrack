@@ -1,11 +1,6 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
-import android.Manifest
-import android.content.Context
-import android.net.ConnectivityManager
 import android.util.Log
-import androidx.annotation.RequiresPermission
-import androidx.compose.runtime.rememberCoroutineScope
 import com.Lee_34393862.nutritrack.data.network.FruityViceAPIService
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import kotlinx.coroutines.CoroutineScope

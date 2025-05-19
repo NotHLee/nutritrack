@@ -28,14 +28,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import com.Lee_34393862.nutritrack.shared.CustomSearchBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +44,7 @@ import coil3.compose.AsyncImage
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
+import com.Lee_34393862.nutritrack.shared.CustomSearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

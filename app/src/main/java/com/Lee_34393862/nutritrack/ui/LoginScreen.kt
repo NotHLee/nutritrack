@@ -23,8 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -51,16 +49,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.Screens
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginScreenState
 import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
-import com.Lee_34393862.nutritrack.shared.CustomErrorSnackBar
 import com.Lee_34393862.nutritrack.shared.CustomPasswordTextField
 import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
-import com.Lee_34393862.nutritrack.shared.CustomSuccessSnackBar
 import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
 import com.Lee_34393862.nutritrack.shared.showSuccessSnackbar
 import kotlinx.coroutines.CoroutineScope
@@ -70,7 +64,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 fun LoginScreen(
     viewModel: LoginViewModel,
-    navController: NavHostController,
+    navigateToQuestions: () -> Unit
 ) {
 
     val patientIds by viewModel.patientIds.collectAsState()
@@ -111,7 +105,7 @@ fun LoginScreen(
                 )
             else {
                 LoginSheet(
-                    navController = navController,
+                    navigateToQuestions = { navigateToQuestions() },
                     scope = scope,
                     patientIds = patientIds,
                     isLoadingState = isLoadingState,
@@ -192,7 +186,7 @@ fun LoginScreen(
 
 @Composable
 fun LoginSheet(
-    navController: NavHostController,
+    navigateToQuestions: () -> Unit,
     scope: CoroutineScope,
     patientIds: List<String>,
     isLoadingState: LoginScreenState,
@@ -200,7 +194,6 @@ fun LoginSheet(
     onRegister: () -> Unit,
     onError: suspend (String) -> Unit
 ) {
-
     var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
     var userId by remember { mutableStateOf<String>("") }
     var password by remember { mutableStateOf<String>("") }
@@ -261,7 +254,7 @@ fun LoginSheet(
                     scope.launch {
                         onLogin(userId, password)
                             .onSuccess { _ ->
-                                navController.navigate(Screens.Question.route)
+                                navigateToQuestions()
                             }
                             .onFailure { error ->
                                 error.message?.let { onError(it) }

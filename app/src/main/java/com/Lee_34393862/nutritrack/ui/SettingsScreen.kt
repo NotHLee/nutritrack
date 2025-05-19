@@ -34,8 +34,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -51,7 +50,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.Lee_34393862.nutritrack.data.viewmodel.LoginScreenState
+import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
 import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -64,6 +63,7 @@ data class OtherSettingButtons(val icon: ImageVector, val text: String, val onCl
 fun SettingsScreen(
     innerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState,
+    navigateToClinician: () -> Unit,
     viewModel: SettingsViewModel
 ) {
 
@@ -105,7 +105,7 @@ fun SettingsScreen(
             sheetState = modalBottomSheetState
         ) {
             ClinicianLoginSheet(
-                toClinicianScreen = { },
+                toClinicianScreen = { navigateToClinician() },
                 scope = scope,
                 onLogin = { key -> viewModel.clinicianLogin(key) },
                 onError = { error -> showErrorSnackbar(

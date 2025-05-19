@@ -35,10 +35,10 @@ class SettingsViewModel(
     // function to login into the clinician screen
     fun clinicianLogin(key: String): Result<String> {
         val secretKey = "dollar-entry-apples"
-        if (key == secretKey) {
-            return Result.success("Clinician login successful")
+        return if (key == secretKey) {
+            Result.success("Clinician login successful")
         } else {
-            return Result.failure(Exception("Incorrect key"))
+            Result.failure(Exception("Incorrect key"))
         }
     }
 }
