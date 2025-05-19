@@ -8,6 +8,7 @@ import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.StateFlow
 
 class InsightsViewModel(context: Context, private val userRepository: UserRepository): ViewModel() {
+    // TODO: list out each user attribute instead of using a generic user object
     val currentUser: StateFlow<User?> get() = userRepository.currentUser
 
     class InsightsViewModelFactory(context: Context, private val userRepository: UserRepository): ViewModelProvider.Factory {

@@ -14,6 +14,7 @@ class GenAIService {
         modelName = "gemini-2.0-flash-001"
     )
 
+    // function to generate content from a prompt
     fun generateContentStream(prompt: String): Flow<GenerateContentResponse> {
         return model.generateContentStream(
             content {

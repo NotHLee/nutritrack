@@ -11,6 +11,7 @@ import com.Lee_34393862.nutritrack.data.network.GenAIService
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
 import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
+import com.Lee_34393862.nutritrack.data.repositories.User
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
     private val messageRepository = MessageRepository(context = context)
 
     private val genAIService = GenAIService()
+    private val _currentUser = MutableStateFlow<User?>(null)
     private val _fruitSuggestions = MutableStateFlow<List<FruitSuggestion>>(emptyList())
     private val _fruitDetails = MutableStateFlow<FruityViceResponseModel?>(null)
     private val _currentMotivationalMessage = MutableStateFlow<String?>(null)
@@ -34,10 +36,10 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
     val motivationalMessages: StateFlow<List<String>> = _motivationalMessages.asStateFlow()
 
     init {
-        Log.d("nutritrack", "nutritarck")
         viewModelScope.launch {
             userRepository.currentUser.collect { user ->
                 if (user != null) {
+                    _currentUser.value = user
                     // fruit score is only optimal if fruit heifa score is the max
                     when (user.fruitHeifaScore >= 10.0) {
                         true -> { }     // nutritrack will load a random image if optimal fruit score
@@ -76,7 +78,13 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
     }
 
     fun generateMotivationalMessage() {
-        val prompt = "Generate a short encouraging message to help someone improve their fruit intake."
+        val prompt = """
+            The user has the following profile:
+            ${_currentUser.value.toString()}
+            Generate a short, encouraging and personalized message with emojis to help someone improve their fruit intake based on his/her profile.
+            Example message:
+            Hey! Just a little reminder that adding more fruit to your day is a great way to boost your health and energy. Even a small handful or a slice can make a difference. Keep going, you got this! 🍎 🍓 🍌 
+        """.trimIndent()
         val fullResponse = StringBuilder()
         // stream text so that it dynamically generates the output rather than output it in one go
         viewModelScope.launch {

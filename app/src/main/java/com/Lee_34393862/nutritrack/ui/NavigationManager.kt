@@ -82,7 +82,8 @@ fun NavigationManager(
         }
         composable(route = Screens.Clinician.route) {
             ClinicianScreen(
-                viewModel = clinicianViewModel
+                viewModel = clinicianViewModel,
+                navigateBack = { navController.popBackStack() },
             )
         }
     }

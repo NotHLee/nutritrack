@@ -30,4 +30,8 @@ class PatientRepository {
 
     fun getAllPatientIds(): Flow<List<String>> = patientDao.getAllPatientIds()
 
+    fun getMaleHeifaScoreAverage(): Flow<Double> = patientDao.getMaleHeifaScoreAverage()
+
+    fun getFemaleHeifaScoreAverage(): Flow<Double> = patientDao.getFemaleHeifaScoreAverage()
+
 }

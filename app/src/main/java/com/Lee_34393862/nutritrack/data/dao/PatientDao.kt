@@ -33,4 +33,10 @@ interface PatientDao {
 
     @Query("SELECT userId FROM patients ORDER BY CAST(userId AS INTEGER) ASC")
     fun getAllPatientIds(): Flow<List<String>>
+
+    @Query("SELECT AVG(heifaTotalScoreMale) FROM patients WHERE sex = 'Male'")
+    fun getMaleHeifaScoreAverage(): Flow<Double>
+
+    @Query("SELECT AVG(heifaTotalScoreFemale) FROM patients WHERE sex = 'Female'")
+    fun getFemaleHeifaScoreAverage(): Flow<Double>
 }

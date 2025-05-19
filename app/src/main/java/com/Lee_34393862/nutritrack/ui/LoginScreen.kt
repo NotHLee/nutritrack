@@ -219,25 +219,12 @@ fun LoginSheet(
             onValueChange = { userId = it },
         )
         Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            trailingIcon = {
-                IconButton(
-                    onClick = { passwordVisible = !passwordVisible }
-                ) {
-                    when (passwordVisible) {
-                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
-                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
-                    }
-                }
-            }
+        CustomPasswordTextField(
+            labelText = "Password",
+            password = password,
+            onPasswordChange = { password = it },
+            passwordVisible = passwordVisible,
+            onToggleVisiblity = { passwordVisible = !passwordVisible }
         )
         Text(
             text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
@@ -401,6 +388,7 @@ fun RegisterSheet(
         )
         Spacer(modifier = Modifier.size(16.dp))
         CustomPasswordTextField(
+            labelText = "Password",
             password = password,
             onPasswordChange = { password = it },
             passwordVisible = passwordVisible,
@@ -408,6 +396,7 @@ fun RegisterSheet(
         )
         Spacer(modifier = Modifier.size(16.dp))
         CustomPasswordTextField(
+            labelText = "Confirm Password",
             password = confirmPassword,
             onPasswordChange = { confirmPassword = it },
             passwordVisible = confirmPasswordVisible,

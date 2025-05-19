@@ -44,7 +44,6 @@ fun InsightsScreen(
 ) {
 
     val currentUser by viewModel.currentUser.collectAsState()
-
     val foodScoreList: List<FoodScore> = listOf(
         FoodScore(
             name = "Vegetables",

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CustomPasswordTextField(
+    labelText: String,
     password: String,
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
@@ -27,7 +28,7 @@ fun CustomPasswordTextField(
     TextField(
         value = password,
         onValueChange = { onPasswordChange(it) },
-        label = { Text("Password") },
+        label = { Text(labelText) },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         modifier = Modifier

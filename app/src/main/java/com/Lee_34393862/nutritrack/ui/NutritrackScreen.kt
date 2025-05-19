@@ -1,5 +1,7 @@
 package com.Lee_34393862.nutritrack.ui
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.History
@@ -45,6 +49,7 @@ import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 import com.Lee_34393862.nutritrack.shared.CustomSearchBar
+import com.Lee_34393862.nutritrack.shared.StreamingText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -155,10 +160,11 @@ fun NutritrackScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
+                    .verticalScroll(state = rememberScrollState())
             ) {
                 when (currentMotivationalMessage) {
                     null -> Text("")
-                    else -> Text(currentMotivationalMessage!!)
+                    else -> StreamingText(currentMotivationalMessage!!)
                 }
             }
         }
@@ -286,7 +292,7 @@ fun FruitSearchSection(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
+                    .fillMaxHeight(0.42f)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -305,19 +311,13 @@ fun FruitSearchSection(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
+                    .fillMaxHeight(0.42f)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    Text(
-                        fruitDetails.name,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
                     // first 3 details about plant info
                     Column(modifier = Modifier.fillMaxWidth()) {
                         fruitDetailsTexts.take(3).forEach { details ->
@@ -332,7 +332,7 @@ fun FruitSearchSection(
                     }
                     HorizontalDivider(
                         modifier = Modifier.padding(
-                            vertical = 16.dp,
+                            vertical = 8.dp,
                             horizontal = 8.dp
                         )
                     )
