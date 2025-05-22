@@ -4,29 +4,30 @@ import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -37,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +52,10 @@ import androidx.compose.ui.window.Dialog
 import com.Lee_34393862.nutritrack.R
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
+import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
 import com.Lee_34393862.nutritrack.shared.CustomTimePicker
+import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 data class Persona(val name: String, val description: String, val picture: Int, var isExpanded: Boolean = false)
@@ -62,9 +67,10 @@ data class TimeBox(val question: String, var time: LocalTime = LocalTime.MIDNIGH
 fun QuestionScreen(
     navigateToLogin: () -> Unit,
     navigateToDashboard: () -> Unit,
+    showSuccessSnackbarInDashboard: (String) -> Unit,
     viewModel: QuestionsViewModel,
 ) {
-
+    val scope = rememberCoroutineScope()
     val context: Context = LocalContext.current
     val foodIntakeResponses by viewModel.foodIntakeResponses.collectAsState()
     val foodList = remember(foodIntakeResponses) {
@@ -128,140 +134,147 @@ fun QuestionScreen(
             ),
             TimeBox(
                 question = "What time of day approx, do you wake up in the morning?",
-                time = LocalTime.parse(foodIntakeResponses?.sleepTime ?: "00:00")
+                time = LocalTime.parse(foodIntakeResponses?.wakeUpTime ?: "00:00")
             )
         )
     }
 
-    if (viewModel.isLoading) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-    } else {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Food Intake Questionnaire",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                navigateToLogin()
-                            }
-                        )
-                        {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "back button"
-                            )
+    val mySnackbarHostState = remember { SnackbarHostState() }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = mySnackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Food Intake Questionnaire",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navigateToLogin()
                         }
-                    }
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                FoodCategories(
-                    foodList = foodList,
-                    onCheckedChange = { index, checked ->
-                        foodList[index] =
-                            foodList[index].copy(checked = checked)
-                    }
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                PersonaInfo(
-                    personaList = personaList,
-                    onExpand = { index ->
-                        personaList[index] =
-                            personaList[index].copy(isExpanded = true)
-                    },
-                    onDismissRequest = { index ->
-                        personaList[index] =
-                            personaList[index].copy(isExpanded = false)
-                    }
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Text(
-                    "Which persona best fits you?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                CustomDropdownSelector(
-                    items = personaList.map { persona -> persona.name },
-                    label = "Select persona",
-                    value = selectedPersona?.name ?: "",
-                    onValueChange = { name ->
-                        selectedPersona =
-                            personaList.find { persona -> persona.name == name }
-                    },
-                    expanded = personaDropdownExpanded,
-                    onExpandedChange = { personaDropdownExpanded = it }
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                TimeQuestions(
-                    context = context,
-                    items = timeBoxList,
-                    onTimeChange = { index, time ->
-                        timeBoxList[index] =
-                            timeBoxList[index].copy(time = time)
-                    }
-                )
-                HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
-                Button(
-                    onClick = {
-                        navigateToDashboard()
-                        viewModel.savePreference(
-                            fruits = foodList[0].checked,
-                            redMeat = foodList[1].checked,
-                            fish = foodList[2].checked,
-                            vegetables = foodList[3].checked,
-                            seafood = foodList[4].checked,
-                            eggs = foodList[5].checked,
-                            grains = foodList[6].checked,
-                            poultry = foodList[7].checked,
-                            nutsOrSeeds = foodList[8].checked,
-                            persona = selectedPersona?.name ?: "",
-                            biggestMealTime = timeBoxList[0].time,
-                            sleepTime = timeBoxList[1].time,
-                            wakeUpTime = timeBoxList[2].time                        )
-                    },
-                    colors = ButtonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.contentColorFor(
-                            MaterialTheme.colorScheme.tertiaryContainer
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        disabledContentColor = MaterialTheme.colorScheme.contentColorFor(
-                            MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                    {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back button"
                         )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(state = rememberScrollState())
+        ) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            FoodCategories(
+                foodList = foodList,
+                onCheckedChange = { index, checked ->
+                    foodList[index] =
+                        foodList[index].copy(checked = checked)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            PersonaInfo(
+                personaList = personaList,
+                onExpand = { index ->
+                    personaList[index] =
+                        personaList[index].copy(isExpanded = true)
+                },
+                onDismissRequest = { index ->
+                    personaList[index] =
+                        personaList[index].copy(isExpanded = false)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                "Which persona best fits you?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            CustomDropdownSelector(
+                items = personaList.map { persona -> persona.name },
+                label = "Select persona",
+                value = selectedPersona?.name ?: "",
+                onValueChange = { name ->
+                    selectedPersona =
+                        personaList.find { persona -> persona.name == name }
+                },
+                expanded = personaDropdownExpanded,
+                onExpandedChange = { personaDropdownExpanded = it }
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            TimeQuestions(
+                context = context,
+                items = timeBoxList,
+                onTimeChange = { index, time ->
+                    timeBoxList[index] =
+                        timeBoxList[index].copy(time = time)
+                }
+            )
+            HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+            Button(
+                onClick = {
+                    viewModel.savePreference(
+                        fruits = foodList[0].checked,
+                        redMeat = foodList[1].checked,
+                        fish = foodList[2].checked,
+                        vegetables = foodList[3].checked,
+                        seafood = foodList[4].checked,
+                        eggs = foodList[5].checked,
+                        grains = foodList[6].checked,
+                        poultry = foodList[7].checked,
+                        nutsOrSeeds = foodList[8].checked,
+                        persona = selectedPersona?.name ?: "",
+                        biggestMealTime = timeBoxList[0].time,
+                        sleepTime = timeBoxList[1].time,
+                        wakeUpTime = timeBoxList[2].time)
+                        .onSuccess { success ->
+                            navigateToDashboard()
+                            showSuccessSnackbarInDashboard(success)
+                        }
+                        .onFailure { failure ->
+                            scope.launch {
+                                showErrorSnackbar(mySnackbarHostState, failure.message.toString())
+                            }
+                        }
+                },
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.contentColorFor(
+                        MaterialTheme.colorScheme.tertiaryContainer
                     ),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(0.45f),
-                    shape = RoundedCornerShape(size = 16.dp)
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.contentColorFor(
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(0.45f),
+                shape = RoundedCornerShape(size = 16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(painterResource(R.drawable.save), contentDescription = "save icon")
-                        Spacer(modifier = Modifier.size(4.dp))
-                        Text(
-                            "Save",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Icon(painterResource(R.drawable.save), contentDescription = "save icon")
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text(
+                        "Save",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -269,6 +282,7 @@ fun QuestionScreen(
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FoodCategories(
     foodList: List<Food>,
@@ -280,28 +294,33 @@ fun FoodCategories(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(horizontal = 16.dp)
     )
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    FlowColumn (
+        maxItemsInEachColumn = 3,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 16.dp)
     ) {
-        itemsIndexed(foodList) { index, food ->
-            Row {
+        foodList.forEachIndexed { index, food ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxColumnWidth()
+            ) {
                 Checkbox(
                     checked = food.checked,
                     onCheckedChange = { onCheckedChange(index, !food.checked) }
                 )
                 Text(
                     food.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PersonaInfo(
     personaList: List<Persona>,
@@ -320,23 +339,29 @@ fun PersonaInfo(
         "People can be broadly classified into 6 different types based on their eating preferences. " +
         "Click on each button below to find out the different types, and select the type that best fits you!",
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-    LazyVerticalGrid (
-        columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .padding(horizontal = 16.dp)
+            .padding(bottom = 8.dp)
+    )
+     FlowColumn (
+        maxItemsInEachColumn = 2,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
-        itemsIndexed(personaList) { index, persona ->
-            PersonaDialog(
-                name = persona.name,
-                description = persona.description,
-                picture = persona.picture,
-                isExpanded = persona.isExpanded,
-                onExpand = { onExpand(index) },
-                onDismissRequest = { onDismissRequest(index) }
-            )
+        personaList.forEachIndexed { index, persona ->
+            Box(modifier = Modifier.fillMaxColumnWidth()) {
+                PersonaDialog(
+                    name = persona.name,
+                    description = persona.description,
+                    picture = persona.picture,
+                    isExpanded = persona.isExpanded,
+                    onExpand = { onExpand(index) },
+                    onDismissRequest = { onDismissRequest(index) }
+                )
+            }
         }
     }
 }
@@ -359,9 +384,7 @@ fun PersonaDialog(
             disabledContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.secondaryContainer),
         ),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             name,

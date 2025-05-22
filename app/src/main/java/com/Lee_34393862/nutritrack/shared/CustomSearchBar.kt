@@ -2,6 +2,7 @@ package com.Lee_34393862.nutritrack.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,12 +41,13 @@ fun CustomSearchBar(
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(
-        modifier
+        Modifier
             .semantics { isTraversalGroup = true }
             .fillMaxWidth()
     ) {
         SearchBar(
             modifier = Modifier
+                .then(if (!expanded) modifier else Modifier)
                 .align(Alignment.TopCenter)
                 .semantics { traversalIndex = 0f },
             shadowElevation = 6.dp,
@@ -64,7 +66,7 @@ fun CustomSearchBar(
                 Icon(Icons.Filled.Search, contentDescription = "search")
             },
         ) {
-            LazyColumn {
+            LazyColumn() {
                 items(count = searchResults.size) { index ->
                     val resultText = searchResults[index]
                     ListItem(

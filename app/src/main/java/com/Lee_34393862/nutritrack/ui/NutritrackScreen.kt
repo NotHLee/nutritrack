@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -41,7 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
@@ -118,17 +127,18 @@ fun NutritrackScreen(
                     .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
                     .clip(RoundedCornerShape(16.dp))
             )
-            false -> FruitSearchSection(
-                scope = scope,
-                viewModel = viewModel,
-                query = query,
-                fruitSuggestions = fruitSuggestions,
-                filteredFruitSuggestions = filteredFruitSuggestions,
-                fruitDetailsTexts = fruitDetailsTexts,
-                fruitDetails = fruitDetails,
-                onQueryChange = { query = it },
-                onResultChange = { query = it }
-            )
+            false ->
+                FruitSearchSection(
+                    scope = scope,
+                    viewModel = viewModel,
+                    query = query,
+                    fruitSuggestions = fruitSuggestions,
+                    filteredFruitSuggestions = filteredFruitSuggestions,
+                    fruitDetailsTexts = fruitDetailsTexts,
+                    fruitDetails = fruitDetails,
+                    onQueryChange = { query = it },
+                    onResultChange = { query = it }
+                )
         }
         Spacer(modifier = Modifier.size(16.dp))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
@@ -154,13 +164,10 @@ fun NutritrackScreen(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 8.dp)
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
                     .padding(16.dp)
-                    .verticalScroll(state = rememberScrollState())
             ) {
                 when (currentMotivationalMessage) {
                     null -> Text("")
@@ -218,7 +225,6 @@ fun MessageHistoryDialog(
                     LazyColumn(
                         modifier = Modifier
                             .weight(1f, false)
-
                     ) {
                         items(motivationalMessages) { message ->
                             Card(
@@ -265,6 +271,7 @@ fun FruitSearchSection(
     onResultChange: (String) -> Unit,
 ) {
     CustomSearchBar(
+        modifier = Modifier.padding(horizontal = 16.dp),
         query = query,
         onQueryChange = { onQueryChange(it) },
         onSearch = { currentQuery ->
@@ -294,18 +301,15 @@ fun FruitSearchSection(
             Card(
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .padding(horizontal = 24.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.42f)
+                    .padding(horizontal = 24.dp)
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
+                Column {
                     Text(
                         "No fruit is selected",
                         modifier = Modifier
                             .padding(16.dp)
+                            .wrapContentSize(Alignment.Center)
                     )
                 }
             }
@@ -313,24 +317,26 @@ fun FruitSearchSection(
             Card(
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .padding(horizontal = 24.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.42f)
+                    .padding(horizontal = 24.dp)
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
                         .padding(16.dp)
                 ) {
                     // first 3 details about plant info
                     Column(modifier = Modifier.fillMaxWidth()) {
                         fruitDetailsTexts.take(3).forEach { details ->
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     "${details.label}:",
-                                    modifier = Modifier.fillMaxWidth(0.3f)
+                                    modifier = Modifier.fillMaxWidth(0.3f),
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
-                                Text(details.value)
+                                Text(
+                                    details.value,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
                             }
                         }
                     }
@@ -342,19 +348,23 @@ fun FruitSearchSection(
                     )
                     Text(
                         "Nutritional Values",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
                     // remaining details about nutrition
                     Spacer(modifier = Modifier.size(8.dp))
                     Column(modifier = Modifier.fillMaxWidth()) {
                         fruitDetailsTexts.drop(3).forEach { details ->
-                            Row {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     "${details.label}:",
-                                    modifier = Modifier.fillMaxWidth(0.5f)
+                                    modifier = Modifier.fillMaxWidth(0.5f),
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
-                                Text(details.value)
+                                Text(
+                                    details.value,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
                             }
                         }
                     }

@@ -39,12 +39,12 @@ fun Dashboard(
     insightsViewModel: InsightsViewModel,
     nutritrackViewModel: NutritrackViewModel,
     settingsViewModel: SettingsViewModel,
+    snackbarHostState: SnackbarHostState,
     navigateToQuestion: () -> Unit,
     navigateToClinician: () -> Unit,
 ) {
 
     val navController: NavHostController = rememberNavController()
-    val snackbarHostState = remember { SnackbarHostState() }
     val bottomBarItems: List<BottomBarItem> = listOf(
         BottomBarItem(
             route = DashboardScreens.Home.route,
@@ -107,4 +107,6 @@ fun Dashboard(
         }
     }
 }
+
+
 

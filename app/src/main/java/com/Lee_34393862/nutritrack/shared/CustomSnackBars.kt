@@ -1,15 +1,22 @@
 package com.Lee_34393862.nutritrack.shared
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -53,14 +60,15 @@ suspend fun showErrorSnackbar(
 
 @Composable
 fun CustomSnackbarHost(
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier
 ) {
     SnackbarHost(hostState = snackbarHostState) { data ->
         data.visuals.actionLabel?.let { label ->
             if (label == "success") {
-                CustomSuccessSnackBar(data.visuals.message)
+                CustomSuccessSnackBar(data, modifier)
             } else {
-                CustomErrorSnackBar(data.visuals.message)
+                CustomErrorSnackBar(data, modifier)
             }
         }
     }
@@ -68,12 +76,19 @@ fun CustomSnackbarHost(
 
 @Composable
 fun CustomErrorSnackBar(
-    message: String
+    data: SnackbarData,
+    modifier: Modifier
 ) {
-    Snackbar(containerColor = errorContainerDark) {
+    Snackbar(
+        containerColor = errorContainerDark,
+        modifier = Modifier
+            .wrapContentHeight(Alignment.Bottom)
+            .clickable { data.dismiss() }
+            .then(modifier)
+    ) {
         Row(
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 Icons.Rounded.Clear,
@@ -81,7 +96,7 @@ fun CustomErrorSnackBar(
             )
             Spacer(Modifier.size(8.dp))
             Text(
-                message,
+                data.visuals.message,
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
@@ -90,12 +105,19 @@ fun CustomErrorSnackBar(
 
 @Composable
 fun CustomSuccessSnackBar(
-    message: String
+    data: SnackbarData,
+    modifier: Modifier
 ) {
-    Snackbar(containerColor = Color.Green) {
+    Snackbar(
+        containerColor = Color.Green,
+        modifier = Modifier
+            .wrapContentHeight(Alignment.Bottom)
+            .clickable { data.dismiss() }
+            .then(modifier)
+    ) {
         Row(
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 Icons.Rounded.CheckCircle,
@@ -103,7 +125,7 @@ fun CustomSuccessSnackBar(
             )
             Spacer(Modifier.size(8.dp))
             Text(
-                message,
+                data.visuals.message,
                 style = MaterialTheme.typography.bodyLarge,
             )
         }

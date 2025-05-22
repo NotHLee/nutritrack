@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +32,6 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
     private var _foodIntakeResponses = MutableStateFlow<FoodIntake?>(null)
     val foodIntakeResponses: StateFlow<FoodIntake?> get() = _foodIntakeResponses.asStateFlow()
 
-    var isLoading by mutableStateOf<Boolean>(true)
-
     // initial loading of values
     init {
         viewModelScope.launch {
@@ -46,7 +45,6 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
                 }
             }
         }
-        isLoading = false
     }
 
     // save food intake questionnaire to db
@@ -64,7 +62,16 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
        biggestMealTime: LocalTime,
        sleepTime: LocalTime,
        wakeUpTime: LocalTime,
-    ) {
+    ) : Result<String> {
+
+        // validation: check if any of the times are same
+        val times = listOf(biggestMealTime, sleepTime, wakeUpTime)
+        if (times.toSet().size < times.size) {
+            // a set cannot have identical instances, so if size of set is lesser than original list
+            // that means we have some identical time instances
+            return Result.failure(Exception("Timings cannot be identical to each other"))
+        }
+
         viewModelScope.launch {
             foodIntakeRepository.update(
                 FoodIntake(
@@ -85,6 +92,7 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
                 )
             )
         }
+        return Result.success("Preferences successfully saved")
     }
 
     class QuestionsViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {

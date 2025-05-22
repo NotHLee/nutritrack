@@ -1,16 +1,15 @@
 package com.Lee_34393862.nutritrack.ui
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
-import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
-import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
-import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
 import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.ClinicianViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
@@ -19,6 +18,8 @@ import com.Lee_34393862.nutritrack.data.viewmodel.LoginViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
+import com.Lee_34393862.nutritrack.shared.showSuccessSnackbar
+import kotlinx.coroutines.launch
 
 // Top-level screens
 sealed class Screens(val route: String) {
@@ -56,6 +57,9 @@ fun NavigationManager(
         }
     }
 
+    val scope = rememberCoroutineScope()
+    val dashboardSnackHostState = remember { SnackbarHostState() }
+
     NavHost(navController = navController, startDestination = Screens.Login.route) {
         composable(route = Screens.Login.route) {
             LoginScreen(
@@ -67,6 +71,11 @@ fun NavigationManager(
             QuestionScreen(
                 navigateToLogin = { navController.navigate(Screens.Login.route) },
                 navigateToDashboard = { navController.navigate(Screens.Dashboard.route) },
+                showSuccessSnackbarInDashboard = { success ->
+                    scope.launch {
+                        showSuccessSnackbar(dashboardSnackHostState, success)
+                    }
+                },
                 viewModel = questionsViewModel
             )
         }
@@ -76,6 +85,7 @@ fun NavigationManager(
                 insightsViewModel = insightsViewModel,
                 nutritrackViewModel = nutritrackViewModel,
                 settingsViewModel = settingsViewModel,
+                snackbarHostState = dashboardSnackHostState,
                 navigateToQuestion = { navController.navigate(Screens.Questions.route) },
                 navigateToClinician = { navController.navigate(Screens.Clinician.route) }
             )

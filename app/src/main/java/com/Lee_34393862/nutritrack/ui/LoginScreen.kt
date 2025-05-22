@@ -4,13 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -122,51 +127,52 @@ fun LoginScreen(
         },
         sheetPeekHeight = 0.dp,
         snackbarHost = {
-            CustomSnackbarHost(snackbarHostState = bottomSheetScaffoldState.snackbarHostState)
+            CustomSnackbarHost(
+                snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
+            )
         }
     ) { innerPadding ->
         // main content
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "Nutritrack ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 48.sp
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.clipart139948),
-                    contentDescription = "Nutritrack Logo",
-                    modifier = Modifier.padding(16.dp),
-                    tint = Color.Unspecified
-                )
-                DisclaimerText()
-
-                // only allow user to press login when all user ids are loaded
-                if (isLoadingState == LoginScreenState.InitialLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                bottomSheetScaffoldState.bottomSheetState.expand()
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(48.dp)
-                    ) {
-                        Text("Login")
-                    }
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState()),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Nutritrack ",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 48.sp
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.clipart139948),
+                contentDescription = "Nutritrack Logo",
+                modifier = Modifier.padding(16.dp),
+                tint = Color.Unspecified
+            )
+            DisclaimerText()
+             // only allow user to press login when all user ids are loaded
+            if (isLoadingState == LoginScreenState.InitialLoading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .height(48.dp)
+                ) {
+                    Text("Login")
                 }
             }
             Text(
@@ -176,7 +182,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
                 modifier = Modifier
-                    .align(alignment = Alignment.BottomCenter)
+                    .align(alignment = Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .padding(bottom = 32.dp)
             )
@@ -201,7 +207,9 @@ fun LoginSheet(
     var passwordVisible by remember { mutableStateOf<Boolean>(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -239,10 +247,10 @@ fun LoginSheet(
         } else {
             Button(
                 onClick = {
-                    keyboardController?.hide()
                     scope.launch {
                         onLogin(userId, password)
                             .onSuccess { _ ->
+                                keyboardController?.hide()
                                 navigateToQuestions()
                             }
                             .onFailure { error ->
@@ -353,7 +361,9 @@ fun RegisterSheet(
     var confirmPasswordVisible by remember { mutableStateOf<Boolean>(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -416,10 +426,10 @@ fun RegisterSheet(
         } else {
             Button(
                 onClick = {
-                    keyboardController?.hide()
                     scope.launch {
                         onRegister(userId, name, phoneNumber, password, confirmPassword)
                             .onSuccess { success ->
+                                keyboardController?.hide()
                                 onSuccess(success)
                             }
                             .onFailure { error ->

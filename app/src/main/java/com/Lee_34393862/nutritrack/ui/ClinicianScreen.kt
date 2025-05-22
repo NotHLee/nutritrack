@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.Lee_34393862.nutritrack.shared.BoldAnnotatedText
 import com.Lee_34393862.nutritrack.shared.StreamingText
 import kotlinx.coroutines.delay
@@ -66,7 +67,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClinicianScreen(
-    viewModel: ClinicianViewModel,
+    viewModel: ClinicianViewModel = viewModel<ClinicianViewModel>(),
     navigateBack: () -> Unit,
 ) {
     val maleHeifaScoreAverage by viewModel.maleHeifaScoreAverage.collectAsState()
