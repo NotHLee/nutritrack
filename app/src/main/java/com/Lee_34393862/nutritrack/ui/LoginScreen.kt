@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -66,7 +67,6 @@ fun LoginScreen(
     viewModel: LoginViewModel,
     navigateToQuestions: () -> Unit
 ) {
-
     val patientIds by viewModel.patientIds.collectAsState()
     val isLoadingState by viewModel.isLoadingState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -87,7 +87,7 @@ fun LoginScreen(
                                    phoneNumber,
                                    password,
                                    confirmPassword ->
-                        viewModel.register(userId, name, phoneNumber, password, confirmPassword)
+                            viewModel.register(userId, name, phoneNumber, password, confirmPassword)
                      },
                     onSuccess = { success ->
                         registerMode = false
@@ -194,6 +194,7 @@ fun LoginSheet(
     onRegister: () -> Unit,
     onError: suspend (String) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
     var userId by remember { mutableStateOf<String>("") }
     var password by remember { mutableStateOf<String>("") }
@@ -238,6 +239,7 @@ fun LoginSheet(
         } else {
             Button(
                 onClick = {
+                    keyboardController?.hide()
                     scope.launch {
                         onLogin(userId, password)
                             .onSuccess { _ ->
@@ -340,6 +342,7 @@ fun RegisterSheet(
     onSuccess: suspend (String) -> Unit,
     onError: suspend (String) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
     var userId by remember { mutableStateOf<String>("") }
     var name by remember { mutableStateOf<String>("") }
@@ -413,6 +416,7 @@ fun RegisterSheet(
         } else {
             Button(
                 onClick = {
+                    keyboardController?.hide()
                     scope.launch {
                         onRegister(userId, name, phoneNumber, password, confirmPassword)
                             .onSuccess { success ->

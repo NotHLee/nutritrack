@@ -70,22 +70,20 @@ fun CustomSnackbarHost(
 fun CustomErrorSnackBar(
     message: String
 ) {
-    Popup {
-        Snackbar(containerColor = errorContainerDark) {
-            Row(
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Icon(
-                    Icons.Rounded.Clear,
-                    contentDescription = "error",
-                )
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    message,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+    Snackbar(containerColor = errorContainerDark) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Icon(
+                Icons.Rounded.Clear,
+                contentDescription = "error",
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }
@@ -94,22 +92,20 @@ fun CustomErrorSnackBar(
 fun CustomSuccessSnackBar(
     message: String
 ) {
-    Popup {
-        Snackbar(containerColor = Color.Green) {
-            Row(
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Icon(
-                    Icons.Rounded.CheckCircle,
-                    contentDescription = "success",
-                )
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    message,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+    Snackbar(containerColor = Color.Green) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Icon(
+                Icons.Rounded.CheckCircle,
+                contentDescription = "success",
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }
