@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.Lee_34393862.nutritrack.data.AuthManager
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.network.GenAIService
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
@@ -40,6 +41,9 @@ class ClinicianViewModel(context: Context) : ViewModel() {
             patientRepository.getAllPatients().collect {
                 _patients.value = it
             }
+        }
+        viewModelScope.launch {
+            AuthManager.currentUser
         }
     }
 

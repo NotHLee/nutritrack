@@ -1,12 +1,15 @@
 package com.Lee_34393862.nutritrack.data
 
+import android.util.Log
 import com.Lee_34393862.nutritrack.data.entities.Patient
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object AuthManager {
 
+    private var _updateUserJob: Job? = null
     private var _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
@@ -15,7 +18,14 @@ object AuthManager {
         _currentUser.value = patientToUser(patient)
     }
 
+    // function to save current job that is updating the user via patient repository
+    fun saveUpdateUserJob(job: Job) {
+        _updateUserJob = job
+    }
+
     fun logout() {
+        _updateUserJob?.cancel()
+        _updateUserJob = null
         _currentUser.value = null
     }
 }

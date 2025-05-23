@@ -68,7 +68,7 @@ fun NavigationManager(
         }
         composable(route = Screens.Questions.route) {
             QuestionScreen(
-                navigateToLogin = { navController.navigate(Screens.Login.route) },
+                navigateToLogin = { AuthManager.logout() },
                 navigateToDashboard = { navController.navigate(Screens.Dashboard.route) },
                 showSuccessSnackbarInDashboard = { success ->
                     scope.launch {

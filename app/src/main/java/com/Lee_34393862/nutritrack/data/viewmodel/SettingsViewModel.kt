@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(context: Context) : ViewModel() {
@@ -20,7 +21,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            AuthManager.currentUser.collect { user ->
+            AuthManager.currentUser.collectLatest { user ->
                 _currentUserName.value = user?.name ?: ""
                 _currentUserPhoneNumber.value = user?.phoneNumber ?: ""
                 _currentUserId.value = user?.userId ?: ""

@@ -1,6 +1,7 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -26,12 +28,16 @@ class QuestionsViewModel(context: Context): ViewModel() {
     // initial loading of values
     init {
         viewModelScope.launch {
-            AuthManager.currentUser.collect { user ->
+            // use collectLatest to ensure we get the newest current user
+            AuthManager.currentUser.collectLatest { user ->
                 if (user != null) {
                     // load food intake data once user exist
                     foodIntakeRepository.getFoodIntakeByUserId(user.userId).collect { foodIntake ->
                         _foodIntakeResponses.value = foodIntake
                     }
+                } else {
+                    // reset value if user is null (logged out)
+                    _foodIntakeResponses.value = null
                 }
             }
         }

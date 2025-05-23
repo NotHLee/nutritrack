@@ -7,18 +7,20 @@ import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.AuthManager
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 sealed class LoginScreenState {
-    data object Idle: LoginScreenState()
-    data object InitialLoading: LoginScreenState()
-    data object LoginLoading: LoginScreenState()
-    data object RegisterLoading: LoginScreenState()
+    object Idle: LoginScreenState()
+    object InitialLoading: LoginScreenState()
+    object LoginLoading: LoginScreenState()
+    object RegisterLoading: LoginScreenState()
 }
 
 class LoginViewModel(context: Context) : ViewModel() {
@@ -68,11 +70,14 @@ class LoginViewModel(context: Context) : ViewModel() {
         }
 
         // cache patient as current user for global access
-        viewModelScope.launch {
-            patientFlow.collect { patient ->
-                patient?.let { AuthManager.saveCurrentUserSession(it) }
+        val updateUserJob = viewModelScope.launch {
+            patientRepository.getPatientByUserId(userId).collect { patient ->
+                if (patient != null) {
+                    AuthManager.saveCurrentUserSession(patient)
+                }
             }
         }
+        AuthManager.saveUpdateUserJob(updateUserJob)
 
         _isLoadingState.value = LoginScreenState.Idle
         return Result.success("Login successful")

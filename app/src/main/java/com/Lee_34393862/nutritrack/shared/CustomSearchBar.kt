@@ -3,11 +3,13 @@ package com.Lee_34393862.nutritrack.shared
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -38,6 +40,7 @@ fun CustomSearchBar(
     onSearch: (String) -> Unit,
     searchResults: List<String>,
     onResultClick: (String) -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
 
@@ -83,20 +86,28 @@ fun CustomSearchBar(
                 }
             }
 
-            LazyColumn() {
-                items(count = searchResults.size) { index ->
-                    val resultText = searchResults[index]
-                    ListItem(
-                        headlineContent = { Text(resultText) },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier
-                            .clickable {
-                                onResultClick(resultText)
-                                expanded = false
-                            }
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
+            when (isLoading) {
+                true -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+                false -> LazyColumn() {
+                    items(count = searchResults.size) { index ->
+                        val resultText = searchResults[index]
+                        ListItem(
+                            headlineContent = { Text(resultText) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier
+                                .clickable {
+                                    onResultClick(resultText)
+                                    expanded = false
+                                }
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }

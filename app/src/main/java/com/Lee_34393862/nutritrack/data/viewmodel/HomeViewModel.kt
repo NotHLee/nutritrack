@@ -1,6 +1,7 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.Lee_34393862.nutritrack.data.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class HomeViewModel(context: Context): ViewModel() {
@@ -21,10 +23,15 @@ class HomeViewModel(context: Context): ViewModel() {
     // initial loading
     init {
         viewModelScope.launch {
-            AuthManager.currentUser.collect { user ->
+            // collectLatest to get the latest current user
+            AuthManager.currentUser.collectLatest { user ->
                 if (user != null) {
                     _currentUserName.value = user.name
                     _currentUserTotalFoodScore.value = user.heifaTotalScore
+                } else {
+                    // reset value if user logs out (is null)
+                    _currentUserName.value = ""
+                    _currentUserTotalFoodScore.value = 0.0
                 }
             }
         }

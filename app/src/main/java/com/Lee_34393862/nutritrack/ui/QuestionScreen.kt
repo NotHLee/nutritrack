@@ -138,7 +138,6 @@ fun QuestionScreen(
             )
         )
     }
-
     val mySnackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(

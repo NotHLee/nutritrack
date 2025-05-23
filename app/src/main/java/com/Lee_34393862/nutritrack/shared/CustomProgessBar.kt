@@ -69,7 +69,7 @@ fun CustomProgressBar(
     modifier: Modifier,
 ) {
 
-    var progress by remember { mutableFloatStateOf(progressValue/progressMax) }
+    var progress by remember(progressValue) { mutableFloatStateOf(progressValue/progressMax) }
 
     Box(
         contentAlignment = Alignment.CenterStart,
