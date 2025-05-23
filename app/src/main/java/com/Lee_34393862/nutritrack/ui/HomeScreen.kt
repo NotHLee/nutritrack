@@ -71,7 +71,10 @@ fun HomeScreen(
             painter = painterResource(R.drawable.foodplate),
             contentDescription = "foodplate",
             contentScale = ContentScale.FillHeight,
-            modifier = Modifier.height(256.dp)
+            modifier = Modifier
+                .height(256.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
         )
         MyScore(
             foodScore = currentUserTotalFoodScore.toString(),

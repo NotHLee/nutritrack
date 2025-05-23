@@ -87,6 +87,7 @@ fun ClinicianScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp)
+                .verticalScroll(state = rememberScrollState())
         ) {
             Text("Average Heifa Score", style = MaterialTheme.typography.headlineSmall)
             Spacer(modifier = Modifier.size(8.dp))
@@ -170,9 +171,7 @@ fun ClinicianScreen(
                 Text("Find Data Patterns")
             }
             Spacer(modifier = Modifier.size(8.dp))
-            Column(
-                modifier = Modifier.verticalScroll(state = rememberScrollState())
-            ) {
+            Column {
                 analysisText.forEachIndexed { index, text ->
                     var cardVisible by remember { mutableStateOf(false) }
 
