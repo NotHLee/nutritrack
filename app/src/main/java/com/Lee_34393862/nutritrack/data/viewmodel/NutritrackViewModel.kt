@@ -1,25 +1,24 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.Lee_34393862.nutritrack.data.AuthManager
+import com.Lee_34393862.nutritrack.data.User
 import com.Lee_34393862.nutritrack.data.entities.Message
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import com.Lee_34393862.nutritrack.data.network.GenAIService
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
 import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
-import com.Lee_34393862.nutritrack.data.repositories.User
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class NutritrackViewModel(context: Context, private val userRepository: UserRepository) : ViewModel() {
+class NutritrackViewModel(context: Context) : ViewModel() {
 
     private val fruityViceRepository = FruityViceRepository()
     private val messageRepository = MessageRepository(context = context)
@@ -37,7 +36,7 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
 
     init {
         viewModelScope.launch {
-            userRepository.currentUser.collect { user ->
+            AuthManager.currentUser.collect { user ->
                 if (user != null) {
                     _currentUser.value = user
                     // fruit score is only optimal if fruit heifa score is the max
@@ -99,7 +98,7 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
             val finalMessage = fullResponse.toString().trimEnd()
 
             // then, save message to db
-            userRepository.currentUser.first().let { user ->
+            AuthManager.currentUser.first().let { user ->
                 when (user) {
                     null -> {}
                     else -> { messageRepository.insert(
@@ -113,10 +112,10 @@ class NutritrackViewModel(context: Context, private val userRepository: UserRepo
         }
     }
 
-    class NutritrackViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+    class NutritrackViewModelFactory(context: Context) : ViewModelProvider.Factory {
         private val context = context.applicationContext
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return NutritrackViewModel(context, userRepository) as T
+            return NutritrackViewModel(context) as T
         }
     }
 }

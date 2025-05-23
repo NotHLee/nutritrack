@@ -1,20 +1,18 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.network.GenAIService
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ClinicianViewModel(context: Context, private val userRepository: UserRepository) : ViewModel() {
+class ClinicianViewModel(context: Context) : ViewModel() {
 
     private val patientRepository = PatientRepository(context = context)
     private val genAIService = GenAIService()
@@ -106,10 +104,10 @@ class ClinicianViewModel(context: Context, private val userRepository: UserRepos
         }
     }
 
-    class ClinicianViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+    class ClinicianViewModelFactory(context: Context) : ViewModelProvider.Factory {
         private val context = context.applicationContext
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ClinicianViewModel(context, userRepository) as T
+            return ClinicianViewModel(context) as T
         }
     }
 

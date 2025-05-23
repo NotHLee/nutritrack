@@ -1,29 +1,20 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.Lee_34393862.nutritrack.data.AuthManager
 import com.Lee_34393862.nutritrack.data.entities.FoodIntake
 import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
-import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
-class QuestionsViewModel(context: Context, private val userRepository: UserRepository): ViewModel() {
+class QuestionsViewModel(context: Context): ViewModel() {
 
     // TODO: add validation for food intake questionnaire
     private val foodIntakeRepository = FoodIntakeRepository(context = context)
@@ -35,8 +26,7 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
     // initial loading of values
     init {
         viewModelScope.launch {
-            userRepository.currentUser.collect { user ->
-                Log.d("user", user?.userId ?: "wtf null")
+            AuthManager.currentUser.collect { user ->
                 if (user != null) {
                     // load food intake data once user exist
                     foodIntakeRepository.getFoodIntakeByUserId(user.userId).collect { foodIntake ->
@@ -75,7 +65,7 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
         viewModelScope.launch {
             foodIntakeRepository.update(
                 FoodIntake(
-                    userId = userRepository.currentUser.first()?.userId ?: "",
+                    userId = AuthManager.currentUser.firstOrNull()?.userId ?: "",
                     fruits = fruits,
                     redMeat = redMeat,
                     fish = fish,
@@ -95,10 +85,10 @@ class QuestionsViewModel(context: Context, private val userRepository: UserRepos
         return Result.success("Preferences successfully saved")
     }
 
-    class QuestionsViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+    class QuestionsViewModelFactory(context: Context) : ViewModelProvider.Factory {
         private val context = context.applicationContext
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return QuestionsViewModel(context, userRepository) as T
+            return QuestionsViewModel(context) as T
         }
     }
 

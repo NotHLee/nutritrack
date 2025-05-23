@@ -4,12 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import com.Lee_34393862.nutritrack.data.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(context: Context, private val userRepository: UserRepository) : ViewModel() {
+class SettingsViewModel(context: Context) : ViewModel() {
 
     private var _currentUserName = MutableStateFlow<String>("")
     private var _currentUserPhoneNumber = MutableStateFlow<String>("")
@@ -20,7 +20,7 @@ class SettingsViewModel(context: Context, private val userRepository: UserReposi
 
     init {
         viewModelScope.launch {
-            userRepository.currentUser.collect { user ->
+            AuthManager.currentUser.collect { user ->
                 _currentUserName.value = user?.name ?: ""
                 _currentUserPhoneNumber.value = user?.phoneNumber ?: ""
                 _currentUserId.value = user?.userId ?: ""
@@ -29,7 +29,7 @@ class SettingsViewModel(context: Context, private val userRepository: UserReposi
     }
 
     fun logout() {
-        userRepository.logout()
+        AuthManager.logout()
     }
 
     // function to login into the clinician screen
@@ -42,10 +42,10 @@ class SettingsViewModel(context: Context, private val userRepository: UserReposi
         }
     }
 
-    class SettingsViewModelFactory(context: Context, private val userRepository: UserRepository) : ViewModelProvider.Factory {
+    class SettingsViewModelFactory(context: Context) : ViewModelProvider.Factory {
         private val context = context.applicationContext
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SettingsViewModel(context, userRepository) as T
+            return SettingsViewModel(context) as T
         }
     }
 }

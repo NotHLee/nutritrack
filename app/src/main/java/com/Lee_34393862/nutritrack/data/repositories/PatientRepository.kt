@@ -22,6 +22,10 @@ class PatientRepository {
         patientDao.delete(patient)
     }
 
+    suspend fun update(patient: Patient) {
+        patientDao.update(patient)
+    }
+
     suspend fun deleteAllPatients() {
         patientDao.deleteAllPatients()
     }
@@ -29,6 +33,8 @@ class PatientRepository {
     fun getAllPatients(): Flow<List<Patient>> = patientDao.getAllPatients()
 
     fun getAllPatientIds(): Flow<List<String>> = patientDao.getAllPatientIds()
+
+    fun getPatientByUserId(userId: String): Flow<Patient?> = patientDao.getPatientByUserId(userId = userId)
 
     fun getMaleHeifaScoreAverage(): Flow<Double> = patientDao.getMaleHeifaScoreAverage()
 

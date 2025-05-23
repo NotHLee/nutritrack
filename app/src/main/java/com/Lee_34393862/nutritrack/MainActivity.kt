@@ -1,18 +1,12 @@
 package com.Lee_34393862.nutritrack
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.Lee_34393862.nutritrack.data.datasource.CsvDataSource
-import com.Lee_34393862.nutritrack.data.repositories.FoodIntakeRepository
-import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
-import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
-import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.ClinicianViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
@@ -39,29 +33,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NutritrackTheme {
-                // only 1 instance of user repository to act as auth manager and have shared user data across app
-                val userRepository = UserRepository(context = applicationContext)
-
                 val loginViewModel: LoginViewModel = ViewModelProvider(
-                    this, LoginViewModel.LoginViewModelFactory(this@MainActivity, userRepository)
+                    this, LoginViewModel.LoginViewModelFactory(this@MainActivity)
                 )[LoginViewModel::class.java]
                 val questionsViewModel: QuestionsViewModel = ViewModelProvider(
-                    this, QuestionsViewModel.QuestionsViewModelFactory(this@MainActivity, userRepository)
+                    this, QuestionsViewModel.QuestionsViewModelFactory(this@MainActivity)
                 )[QuestionsViewModel::class.java]
                 val homeViewModel: HomeViewModel = ViewModelProvider(
-                    this, HomeViewModel.HomeViewModelFactory(this@MainActivity, userRepository)
+                    this, HomeViewModel.HomeViewModelFactory(this@MainActivity)
                 )[HomeViewModel::class.java]
                 val insightsViewModel: InsightsViewModel = ViewModelProvider(
-                    this, InsightsViewModel.InsightsViewModelFactory(this@MainActivity, userRepository)
+                    this, InsightsViewModel.InsightsViewModelFactory(this@MainActivity)
                 )[InsightsViewModel::class.java]
                 val nutritrackViewModel: NutritrackViewModel = ViewModelProvider(
-                    this, NutritrackViewModel.NutritrackViewModelFactory(this@MainActivity, userRepository)
+                    this, NutritrackViewModel.NutritrackViewModelFactory(this@MainActivity)
                 )[NutritrackViewModel::class.java]
                 val settingsViewModel: SettingsViewModel = ViewModelProvider(
-                    this, SettingsViewModel.SettingsViewModelFactory(this@MainActivity, userRepository)
+                    this, SettingsViewModel.SettingsViewModelFactory(this@MainActivity)
                 )[SettingsViewModel::class.java]
                 val clinicianViewModel: ClinicianViewModel = ViewModelProvider(
-                    this, ClinicianViewModel.ClinicianViewModelFactory(this@MainActivity, userRepository)
+                    this, ClinicianViewModel.ClinicianViewModelFactory(this@MainActivity)
                 )[ClinicianViewModel::class.java]
 
                 NavigationManager(
@@ -72,7 +63,6 @@ class MainActivity : ComponentActivity() {
                     nutritrackViewModel = nutritrackViewModel,
                     settingsViewModel = settingsViewModel,
                     clinicianViewModel = clinicianViewModel,
-                    userRepository = userRepository,
                 )
             }
         }

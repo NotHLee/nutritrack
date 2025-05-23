@@ -6,16 +6,11 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.data.repositories.FruityViceRepository
-import com.Lee_34393862.nutritrack.data.repositories.MessageRepository
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel

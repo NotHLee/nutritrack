@@ -1,13 +1,7 @@
 package com.Lee_34393862.nutritrack.data.repositories
 
-import android.util.Log
 import com.Lee_34393862.nutritrack.data.network.FruityViceAPIService
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class FruityViceRepository() {
     private val apiService: FruityViceAPIService = FruityViceAPIService.create()

@@ -10,7 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.Lee_34393862.nutritrack.data.repositories.UserRepository
+import com.Lee_34393862.nutritrack.data.AuthManager
 import com.Lee_34393862.nutritrack.data.viewmodel.ClinicianViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
@@ -38,14 +38,13 @@ fun NavigationManager(
     nutritrackViewModel: NutritrackViewModel,
     settingsViewModel: SettingsViewModel,
     clinicianViewModel: ClinicianViewModel,
-    userRepository: UserRepository,
 ) {
     val navController = rememberNavController()
-    val isLogin by userRepository.isLogin.collectAsState()
+    val currentUser by AuthManager.currentUser.collectAsState()
 
-    // redirect user to login whenever the user's auth status changes
-    LaunchedEffect(isLogin) {
-        if (!isLogin) {
+    // redirect user to login whenever current user session is terminated / logout
+    LaunchedEffect(currentUser) {
+        if (currentUser == null) {
             navController.navigate(Screens.Login.route) {
                 // clear back stack up to login page
                 popUpTo(navController.graph.startDestinationId) {
