@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,7 +96,11 @@ fun NutritrackScreen(
             } ?: emptyList()
         }
     }
-    var isMessageHistoryDialogOpen by remember { mutableStateOf<Boolean>(false) }
+    var isMessageHistoryDialogOpen by rememberSaveable { mutableStateOf<Boolean>(false) }
+
+    //
+    val scrollState = rememberScrollState()
+    var searchBarExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     // dialog to show message history
     if (isMessageHistoryDialogOpen) {
@@ -109,6 +114,7 @@ fun NutritrackScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
+            .then(if (!searchBarExpanded) Modifier.verticalScroll(scrollState) else Modifier)
     ) {
         when (fruitSuggestions.isEmpty()) {
             true -> AsyncImage(
@@ -132,12 +138,14 @@ fun NutritrackScreen(
                     fruitDetailsTexts = fruitDetailsTexts,
                     fruitDetails = fruitDetails,
                     onQueryChange = { query = it },
-                    onResultChange = { query = it }
+                    onResultChange = { query = it },
+                    searchBarExpanded = searchBarExpanded,
+                    onSearchBarExpandedChange = { searchBarExpanded = it }
                 )
         }
         Spacer(modifier = Modifier.size(16.dp))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-        Column(modifier = Modifier.verticalScroll(state = rememberScrollState())) {
+        Column {
             Button(
                 onClick = { viewModel.generateMotivationalMessage() },
                 shape = RoundedCornerShape(8.dp),
@@ -267,9 +275,9 @@ fun FruitSearchSection(
     fruitDetails: FruityViceResponseModel?,
     onQueryChange: (String) -> Unit,
     onResultChange: (String) -> Unit,
+    searchBarExpanded: Boolean,
+    onSearchBarExpandedChange: (Boolean) -> Unit
 ) {
-    val localDensity = LocalDensity.current
-
     CustomSearchBar(
         modifier = Modifier.padding(horizontal = 16.dp),
         query = query,
@@ -293,7 +301,8 @@ fun FruitSearchSection(
                 )
             }
         },
-        searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name }
+        searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name },
+        onScrollDisabledChange = { onSearchBarExpandedChange(it) }
     )
     Spacer (modifier = Modifier.size(24.dp))
     when (fruitDetails) {
