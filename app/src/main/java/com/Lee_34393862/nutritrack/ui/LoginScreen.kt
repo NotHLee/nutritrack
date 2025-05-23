@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +68,7 @@ fun LoginScreen(
     val isLoadingState by viewModel.isLoadingState.collectAsState()
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    var registerMode by remember { mutableStateOf<Boolean>(false) }
+    var registerMode by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
@@ -192,10 +193,10 @@ fun LoginSheet(
     onError: suspend (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
-    var userId by remember { mutableStateOf<String>("") }
-    var password by remember { mutableStateOf<String>("") }
-    var passwordVisible by remember { mutableStateOf<Boolean>(false) }
+    var loginSheetDropdownExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
+    var userId by rememberSaveable { mutableStateOf<String>("") }
+    var password by rememberSaveable { mutableStateOf<String>("") }
+    var passwordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier
@@ -342,14 +343,14 @@ fun RegisterSheet(
     onError: suspend (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var loginSheetDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
-    var userId by remember { mutableStateOf<String>("") }
-    var name by remember { mutableStateOf<String>("") }
-    var phoneNumber by remember { mutableStateOf<String>("") }
-    var password by remember { mutableStateOf<String>("") }
-    var confirmPassword by remember { mutableStateOf<String>("") }
-    var passwordVisible by remember { mutableStateOf<Boolean>(false) }
-    var confirmPasswordVisible by remember { mutableStateOf<Boolean>(false) }
+    var loginSheetDropdownExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
+    var userId by rememberSaveable { mutableStateOf<String>("") }
+    var name by rememberSaveable { mutableStateOf<String>("") }
+    var phoneNumber by rememberSaveable { mutableStateOf<String>("") }
+    var password by rememberSaveable { mutableStateOf<String>("") }
+    var confirmPassword by rememberSaveable { mutableStateOf<String>("") }
+    var passwordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
+    var confirmPasswordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier

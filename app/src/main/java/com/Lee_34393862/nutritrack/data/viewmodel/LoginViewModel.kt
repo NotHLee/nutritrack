@@ -51,16 +51,19 @@ class LoginViewModel(context: Context) : ViewModel() {
 
         // null means user does not exist
         if (patient == null) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("User id does not exist"))
         }
 
         // null password means this account has not been claimed, registration is required first
         if (patient.password.isEmpty()) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("User id has not been registered"))
         }
 
         // wrong password
         if (patient.password != password) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Password does not match"))
         }
 
@@ -91,31 +94,37 @@ class LoginViewModel(context: Context) : ViewModel() {
 
         // null means user does not exist
         if (patient == null) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("User id does not exist"))
         }
 
         // non null password means this account has been claimed
         if (patient.password.isNotEmpty()) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("User id has been claimed"))
         }
 
         // match phone number
         if (patient.phoneNumber != phoneNumber) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Incorrect phone number"))
         }
 
         // ensure name is not empty
         if (name.isEmpty()) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Name cannot be empty"))
         }
 
         // ensure password is not empty
         if (password.isEmpty()) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Password cannot be empty"))
         }
 
         // ensure password and confirm password are the same
         if (password != confirmPassword) {
+            _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Passwords do not match"))
         }
 
