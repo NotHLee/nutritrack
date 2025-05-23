@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.History
@@ -39,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -105,7 +109,7 @@ fun NutritrackScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
-    ){
+    ) {
         when (fruitSuggestions.isEmpty()) {
             true -> AsyncImage(
                 model = "https://picsum.photos/800/600",
@@ -117,6 +121,7 @@ fun NutritrackScreen(
                     .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
                     .clip(RoundedCornerShape(16.dp))
             )
+
             false ->
                 FruitSearchSection(
                     scope = scope,
@@ -132,55 +137,58 @@ fun NutritrackScreen(
         }
         Spacer(modifier = Modifier.size(16.dp))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-        Button(
-            onClick = { viewModel.generateMotivationalMessage() },
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            modifier = Modifier.padding(horizontal = 24.dp),
-            elevation = ButtonDefaults.buttonElevation(6.dp)
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.Chat,
-                contentDescription = "Chat",
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text("Motivational Message (AI)")
-        }
-        Spacer(modifier = Modifier.size(8.dp))
-        Card(
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
+        Column(modifier = Modifier.verticalScroll(state = rememberScrollState())) {
+            Button(
+                onClick = { viewModel.generateMotivationalMessage() },
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.padding(horizontal = 24.dp),
+                elevation = ButtonDefaults.buttonElevation(6.dp)
             ) {
-                when (currentMotivationalMessage) {
-                    null -> Text("")
-                    else -> StreamingText(currentMotivationalMessage!!)
+                Icon(
+                    Icons.AutoMirrored.Filled.Chat,
+                    contentDescription = "Chat",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Motivational Message (AI)")
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = LocalConfiguration.current.screenHeightDp.dp / 100 * 25)    // 25% screen height
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    when (currentMotivationalMessage) {
+                        null -> Text("")
+                        else -> StreamingText(currentMotivationalMessage!!)
+                    }
                 }
             }
-        }
-        Button(
-            onClick = { isMessageHistoryDialogOpen = true },
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .align(Alignment.End),
-            elevation = ButtonDefaults.buttonElevation(6.dp)
-        ) {
-            Icon(
-                Icons.Filled.History,
-                contentDescription = "Chat",
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text("Show message history")
+            Button(
+                onClick = { isMessageHistoryDialogOpen = true },
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .align(Alignment.End),
+                elevation = ButtonDefaults.buttonElevation(6.dp)
+            ) {
+                Icon(
+                    Icons.Filled.History,
+                    contentDescription = "Chat",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Show message history")
+            }
         }
     }
 }
