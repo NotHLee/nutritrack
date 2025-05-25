@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     this, QuestionsViewModel.QuestionsViewModelFactory(this@MainActivity)
                 )[QuestionsViewModel::class.java]
                 val homeViewModel: HomeViewModel = ViewModelProvider(
-                    this, HomeViewModel.HomeViewModelFactory(this@MainActivity)
+                    this, HomeViewModel.HomeViewModelFactory()
                 )[HomeViewModel::class.java]
                 val insightsViewModel: InsightsViewModel = ViewModelProvider(
                     this, InsightsViewModel.InsightsViewModelFactory(this@MainActivity)

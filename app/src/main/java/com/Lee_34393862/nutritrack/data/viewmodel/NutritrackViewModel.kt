@@ -52,8 +52,8 @@ class NutritrackViewModel(context: Context) : ViewModel() {
                 _loadingState.value = LoadingState.LoadingInitial
                 Log.d("a", user?.fruitHeifaScore.toString())
                 user?.let {
-                    // not optimal means it is not the max heifa fruit score
-                    when (user.fruitHeifaScore >= 10) {
+                    // optimal means max fruit heifa score (>= 10) or fruit variation is 5 and serve size is 2
+                    when (user.fruitHeifaScore >= 10 || (user.fruitVariationsScore >= 5 && user.fruitServeSize >= 2)) {
                         true -> {
                             _isFruitScoreOptimal.value = true
                         }

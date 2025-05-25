@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -63,10 +63,6 @@ fun NutritrackScreen(
     innerPadding: PaddingValues,
     viewModel: NutritrackViewModel = viewModel(),
 ) {
-    // TODO: fix crash on rotation
-    // TODO: fix exit search bar expansion after onSearch error value
-    // TODO: show blank indicator for all tips
-    // TODO: Fix url rotation thingy fuck you viewmodel
     val loadingState by viewModel.loadingState.collectAsState()
     val fruitSuggestions by viewModel.fruitSuggestion.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
@@ -121,20 +117,26 @@ fun NutritrackScreen(
         if (loadingState != LoadingState.LoadingInitial) {
             when (isFruitScoreOptimal) {
                 null -> { }
-                true -> SubcomposeAsyncImage (
-                            model = "https://picsum.photos/900/1000?random=${Random.nextInt()}",
-                            contentDescription = "Random Image",
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp)
-                                .fillMaxWidth(),
-                            loading = {
-                                CircularProgressIndicator(modifier = Modifier
-                                    .requiredSize(40.dp)
-                                    .fillMaxHeight(0.4f)
-                                )
-                            },
-                        )
+                true ->
+                    SubcomposeAsyncImage (
+                        model = "https://picsum.photos/900/1000?random=${Random.nextInt()}",
+                        contentDescription = "Random Image",
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp)
+                            .aspectRatio(900f / 1000f)
+                            .fillMaxWidth(),
+                        loading = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(900f / 1000f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        },
+                    )
                 false ->
                     FruitSearchSection(
                         viewModel = viewModel,
@@ -157,8 +159,7 @@ fun NutritrackScreen(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(
-                )
+                CircularProgressIndicator()
             }
         }
         Spacer(modifier = Modifier.size(16.dp))
@@ -247,23 +248,34 @@ fun MessageHistoryDialog(
                         .padding(16.dp)
                 )
                 if (loadingState != LoadingState.LoadingInitial) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f, fill = true)
-                    ) {
-                        items(motivationalMessages) { message ->
-                            Card(
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = message,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(16.dp)
-                                )
+                    if (!motivationalMessages.isEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f, fill = true)
+                        ) {
+                            items(motivationalMessages) { message ->
+                                Card(
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = message,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
                             }
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No messages available")
                         }
                     }
                 } else {
