@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.Lee_34393862.nutritrack.data.viewmodel.SettingsViewModel
+import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
 import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -77,8 +80,7 @@ fun SettingsScreen(
     val modalBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    var showBottomSheet by remember { mutableStateOf(false) }
-
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val accountDetails = remember(name, phoneNumber, userId) {
         mutableStateListOf<AccountDetail>(
             AccountDetail(Icons.Filled.Person, name),
@@ -86,7 +88,6 @@ fun SettingsScreen(
             AccountDetail(Icons.Filled.Badge, userId)
         )
     }
-
     val otherSettingButtons = listOf<OtherSettingButtons>(
         OtherSettingButtons(
             icon = Icons.AutoMirrored.Filled.Logout,
@@ -107,6 +108,7 @@ fun SettingsScreen(
             sheetState = modalBottomSheetState
         ) {
             ClinicianLoginSheet(
+                snackbarHostState = snackbarHostState,
                 toClinicianScreen = { navigateToClinician() },
                 scope = scope,
                 onLogin = { key -> viewModel.clinicianLogin(key) },
@@ -206,61 +208,70 @@ fun SettingsScreen(
 
 @Composable
 fun ClinicianLoginSheet(
+    snackbarHostState: SnackbarHostState,
     toClinicianScreen: () -> Unit,
     scope: CoroutineScope,
     onLogin: suspend (String) -> Result<String>,
     onError: suspend (String) -> Unit
 ) {
-    var key by remember { mutableStateOf<String>("") }
-    var keyVisible by remember { mutableStateOf<Boolean>(false) }
+    var key by rememberSaveable { mutableStateOf<String>("") }
+    var keyVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Clinician Login",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 24.sp
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            value = key,
-            onValueChange = { key = it },
-            label = { Text("Clinician Key") },
-            placeholder = { Text("Enter your clinician key") },
-            visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            trailingIcon = {
-                IconButton(
-                    onClick = { keyVisible = !keyVisible }
-                ) {
-                    when (keyVisible) {
-                        true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
-                        false -> Icon(Icons.Filled.Visibility, contentDescription = "visible off")
+
+    Scaffold (
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) }
+    ){ innerPadding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Clinician Login",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            TextField(
+                value = key,
+                onValueChange = { key = it },
+                label = { Text("Clinician Key") },
+                placeholder = { Text("Enter your clinician key") },
+                visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                trailingIcon = {
+                    IconButton(
+                        onClick = { keyVisible = !keyVisible }
+                    ) {
+                        when (keyVisible) {
+                            true -> Icon(Icons.Filled.VisibilityOff, contentDescription = "visible")
+                            false -> Icon(
+                                Icons.Filled.Visibility,
+                                contentDescription = "visible off"
+                            )
+                        }
                     }
                 }
-            }
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Button(
-            onClick = {
-                scope.launch {
-                    onLogin(key)
-                        .onSuccess { _ ->
-                            toClinicianScreen()
-                        }
-                        .onFailure { error ->
-                            error.message?.let { onError(it) }
-                        }
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Button(
+                onClick = {
+                    scope.launch {
+                        onLogin(key)
+                            .onSuccess { _ ->
+                                toClinicianScreen()
+                            }
+                            .onFailure { error ->
+                                error.message?.let { onError(it) }
+                            }
+                    }
                 }
+            ) {
+                Text("Continue")
             }
-        ) {
-            Text("Continue")
         }
     }
 }

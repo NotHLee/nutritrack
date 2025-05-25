@@ -1,6 +1,7 @@
 package com.Lee_34393862.nutritrack.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,12 +34,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +49,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.Lee_34393862.nutritrack.R
+import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost
@@ -72,77 +75,12 @@ fun QuestionScreen(
 ) {
     val scope = rememberCoroutineScope()
     val context: Context = LocalContext.current
-    val foodIntakeResponses by viewModel.foodIntakeResponses.collectAsState()
-    val foodList = remember(foodIntakeResponses) {
-        mutableStateListOf<Food>(
-            Food(name = "Fruits", checked = foodIntakeResponses?.fruits == true),
-            Food(name = "Red Meat", checked = foodIntakeResponses?.redMeat == true),
-            Food(name = "Fish", checked = foodIntakeResponses?.fish == true),
-            Food(name = "Vegetables", checked = foodIntakeResponses?.vegetables == true),
-            Food(name = "Seafood", checked = foodIntakeResponses?.seafood == true),
-            Food(name = "Eggs", checked = foodIntakeResponses?.eggs == true),
-            Food(name = "Grains", checked = foodIntakeResponses?.grains == true),
-            Food(name = "Poultry", checked = foodIntakeResponses?.poultry == true),
-            Food(name = "Nuts/Seeds", checked = foodIntakeResponses?.nutsOrSeeds == true)
-        )
-    }
-    val personaList = remember(foodIntakeResponses) {
-        mutableStateListOf<Persona>(
-            Persona(
-                name = "Health Devotee",
-                description = "I'm passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.",
-                picture = R.drawable.persona_1,
-            ),
-            Persona(
-                name = "Mindful Eater",
-                description = "I'm health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.",
-                picture = R.drawable.persona_2,
-            ),
-            Persona(
-                name = "Wellness Striver",
-                description = "I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I've tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I'll give it a go.",
-                picture = R.drawable.persona_3,
-            ),
-            Persona(
-                name = "Balance Seeker",
-                description = "I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn't have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.",
-                picture = R.drawable.persona_4,
-            ),
-            Persona(
-                name = "Health Procrastinator",
-                description = "I'm contemplating healthy eating but it's not a priority for me right now. I know the basics about what it means to be healthy, but it doesn't seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.",
-                picture = R.drawable.persona_5,
-            ),
-            Persona(
-                name = "Food Carefree",
-                description = "I'm not bothered about healthy eating. I don't really see the point and I don't think about it. I don't really notice healthy eating tips or recipes and I don't care what I eat.",
-                picture = R.drawable.persona_6,
-            )
-        )
-    }
-    var selectedPersona by remember(foodIntakeResponses) { mutableStateOf<Persona?>(personaList.find { persona -> persona.name == foodIntakeResponses?.persona })}
-    var personaDropdownExpanded by remember { mutableStateOf<Boolean>(false) }
-    val timeBoxList = remember(foodIntakeResponses) {
-        mutableStateListOf<TimeBox>(
-            TimeBox(
-                question = "What time of day approx, do you normally eat your biggest meal?",
-                time = LocalTime.parse(foodIntakeResponses?.biggestMealTime ?: "00:00")
-            ),
-            TimeBox(
-                question = "What time of day approx, do you go to sleep at night?",
-                time = LocalTime.parse(foodIntakeResponses?.sleepTime ?: "00:00")
-            ),
-            TimeBox(
-                question = "What time of day approx, do you wake up in the morning?",
-                time = LocalTime.parse(foodIntakeResponses?.wakeUpTime ?: "00:00")
-            )
-        )
-    }
-    val mySnackbarHostState = remember { SnackbarHostState() }
+    var personaDropdownExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        snackbarHost = { CustomSnackbarHost(snackbarHostState = mySnackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -175,22 +113,22 @@ fun QuestionScreen(
         ) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             FoodCategories(
-                foodList = foodList,
+                foodList = viewModel.foodList,
                 onCheckedChange = { index, checked ->
-                    foodList[index] =
-                        foodList[index].copy(checked = checked)
+                    viewModel.foodList[index] =
+                        viewModel.foodList[index].copy(checked = checked)
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             PersonaInfo(
-                personaList = personaList,
+                personaList = viewModel.personaList,
                 onExpand = { index ->
-                    personaList[index] =
-                        personaList[index].copy(isExpanded = true)
+                    viewModel.personaList[index] =
+                        viewModel.personaList[index].copy(isExpanded = true)
                 },
                 onDismissRequest = { index ->
-                    personaList[index] =
-                        personaList[index].copy(isExpanded = false)
+                    viewModel.personaList[index] =
+                        viewModel.personaList[index].copy(isExpanded = false)
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -202,12 +140,12 @@ fun QuestionScreen(
             )
             Spacer(modifier = Modifier.size(8.dp))
             CustomDropdownSelector(
-                items = personaList.map { persona -> persona.name },
+                items = viewModel.personaList.map { persona -> persona.name },
                 label = "Select persona",
-                value = selectedPersona?.name ?: "",
+                value = viewModel.selectedPersonaName,
                 onValueChange = { name ->
-                    selectedPersona =
-                        personaList.find { persona -> persona.name == name }
+                    viewModel.selectedPersonaName =
+                        viewModel.personaList.find { persona -> persona.name == name }?.name ?: ""
                 },
                 expanded = personaDropdownExpanded,
                 onExpandedChange = { personaDropdownExpanded = it }
@@ -215,36 +153,23 @@ fun QuestionScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             TimeQuestions(
                 context = context,
-                items = timeBoxList,
+                items = viewModel.timeBoxList,
                 onTimeChange = { index, time ->
-                    timeBoxList[index] =
-                        timeBoxList[index].copy(time = time)
+                    viewModel.timeBoxList[index] =
+                        viewModel.timeBoxList[index].copy(time = time)
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
             Button(
                 onClick = {
-                    viewModel.savePreference(
-                        fruits = foodList[0].checked,
-                        redMeat = foodList[1].checked,
-                        fish = foodList[2].checked,
-                        vegetables = foodList[3].checked,
-                        seafood = foodList[4].checked,
-                        eggs = foodList[5].checked,
-                        grains = foodList[6].checked,
-                        poultry = foodList[7].checked,
-                        nutsOrSeeds = foodList[8].checked,
-                        persona = selectedPersona?.name ?: "",
-                        biggestMealTime = timeBoxList[0].time,
-                        sleepTime = timeBoxList[1].time,
-                        wakeUpTime = timeBoxList[2].time)
+                    viewModel.savePreference()
                         .onSuccess { success ->
                             navigateToDashboard()
                             showSuccessSnackbarInDashboard(success)
                         }
                         .onFailure { failure ->
                             scope.launch {
-                                showErrorSnackbar(mySnackbarHostState, failure.message.toString())
+                                showErrorSnackbar(snackbarHostState, failure.message.toString())
                             }
                         }
                 },
