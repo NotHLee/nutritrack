@@ -134,7 +134,7 @@ class NutritrackViewModel(context: Context) : ViewModel() {
         throw IllegalStateException("Fruit search should not reach here")
     }
 
-    // functional to generate the motivational message dynamically
+    // function to generate the motivational message dynamically
     // it works by appending chunks of text to a string builder and updating my string stateflow
     fun generateMotivationalMessage() {
         viewModelScope.launch {
