@@ -1,6 +1,6 @@
 package com.Lee_34393862.nutritrack.ui
 
-import android.util.Log
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -37,28 +38,24 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil3.compose.AsyncImage
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.SubcomposeAsyncImage
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.viewmodel.LoadingState
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 import com.Lee_34393862.nutritrack.shared.CustomSearchBar
 import com.Lee_34393862.nutritrack.shared.StreamingText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 data class FruitDetailsText(val label: String, val value: String)
@@ -66,8 +63,12 @@ data class FruitDetailsText(val label: String, val value: String)
 @Composable
 fun NutritrackScreen(
     innerPadding: PaddingValues,
-    viewModel: NutritrackViewModel,
+    viewModel: NutritrackViewModel = viewModel(),
 ) {
+    // TODO: fix crash on rotation
+    // TODO: fix exit search bar expansion after onSearch error value
+    // TODO: show blank indicator for all tips
+    // TODO: Fix url rotation thingy fuck you viewmodel
     val loadingState by viewModel.loadingState.collectAsState()
     val fruitSuggestions by viewModel.fruitSuggestion.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
@@ -101,7 +102,6 @@ fun NutritrackScreen(
         }
     }
     var isMessageHistoryDialogOpen by rememberSaveable { mutableStateOf<Boolean>(false) }
-    val scrollState = rememberScrollState()
     var searchBarExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     // dialog to show message history
@@ -117,25 +117,26 @@ fun NutritrackScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
-            .then(if (!searchBarExpanded) Modifier.verticalScroll(scrollState) else Modifier)
+            .verticalScroll(state = rememberScrollState())
     ) {
         // load picture if fruit score optimal else load fruit search section
         if (loadingState != LoadingState.LoadingInitial) {
             when (isFruitScoreOptimal) {
                 null -> { }
-                true -> {
-                    AsyncImage(
-                        model = "https://picsum.photos/900/1000",
-                        contentDescription = "Random Image",
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 16.dp)
-                            .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(16.dp)
-                            )
-                    )
-                }
+                true -> SubcomposeAsyncImage (
+                            model = "https://picsum.photos/900/1000?random=${Random.nextInt()}",
+                            contentDescription = "Random Image",
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
+                                .fillMaxWidth(),
+                            loading = {
+                                CircularProgressIndicator(modifier = Modifier
+                                    .requiredSize(40.dp)
+                                    .fillMaxHeight(0.4f)
+                                )
+                            },
+                        )
                 false ->
                     FruitSearchSection(
                         viewModel = viewModel,
@@ -144,6 +145,7 @@ fun NutritrackScreen(
                         filteredFruitSuggestions = filteredFruitSuggestions,
                         fruitDetailsTexts = fruitDetailsTexts,
                         fruitDetails = fruitDetails,
+                        searchBarExpanded = searchBarExpanded,
                         onQueryChange = { query = it },
                         onResultChange = { query = it },
                         onSearchBarExpandedChange = { searchBarExpanded = it },
@@ -156,7 +158,6 @@ fun NutritrackScreen(
                     .weight(0.4f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
-
             ) {
                 CircularProgressIndicator(
                 )
@@ -303,11 +304,11 @@ fun FruitSearchSection(
     fruitDetails: FruityViceResponseModel?,
     onQueryChange: (String) -> Unit,
     onResultChange: (String) -> Unit,
+    searchBarExpanded: Boolean,
     onSearchBarExpandedChange: (Boolean) -> Unit,
-    loadingState: LoadingState
+    loadingState: LoadingState,
 ) {
     CustomSearchBar(
-        modifier = Modifier.padding(horizontal = 16.dp),
         query = query,
         onQueryChange = { onQueryChange(it) },
         onSearch = { currentQuery ->
@@ -326,7 +327,8 @@ fun FruitSearchSection(
             )
         },
         searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name },
-        onScrollDisabledChange = { onSearchBarExpandedChange(it) }
+        expanded = searchBarExpanded,
+        onExpandedChange = { onSearchBarExpandedChange(it) }
     )
     Spacer (modifier = Modifier.size(24.dp))
 

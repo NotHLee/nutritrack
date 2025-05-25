@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -18,6 +19,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,85 +31,67 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomSearchBar(
-    onScrollDisabledChange: (Boolean) -> Unit = {},
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     searchResults: List<String>,
     onResultClick: (String) -> Unit,
     isLoading: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
-
-    var expanded by rememberSaveable { mutableStateOf<Boolean>(false) }
-
-    Box(
-        Modifier
-            .semantics { isTraversalGroup = true }
+    DockedSearchBar(
+        modifier = Modifier
             .fillMaxWidth()
+            .semantics { traversalIndex = 0f }
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp)
+        ,
+        shadowElevation = 6.dp,
+        query = query,
+        onQueryChange = onQueryChange,
+        onSearch = {
+            onSearch(query)
+            onExpandedChange(false)
+        },
+        active = expanded,
+        onActiveChange = {
+            onExpandedChange(it)
+         },
+        placeholder = {
+            Text("Search for fruit")
+        },
+        leadingIcon = {
+            Icon(Icons.Filled.Search, contentDescription = "search")
+        },
     ) {
-        SearchBar(
-            modifier = Modifier
-                .then(if (!expanded) modifier else Modifier)
-                .align(Alignment.TopCenter)
-                .semantics { traversalIndex = 0f }
-            ,
-            shadowElevation = 6.dp,
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearch = {
-                onSearch(query)
-                expanded = false
-            },
-            active = expanded,
-            onActiveChange = {
-                onScrollDisabledChange(true)
-                expanded = it
-             },
-            placeholder = {
-                Text("Search for fruit")
-            },
-            leadingIcon = {
-                Icon(Icons.Filled.Search, contentDescription = "search")
-            },
-        ) {
-
-            // if an expanded search bar is in another scrollable column, it will crash due to nested scrolling
-            // a workaround is to simply disable the parent column's scroll temporarily and allow the scroll behaviour of the lazycolumn
-            // only after the lazy column is not rendered, we will reenable the parent column's scroll behaviour
-            DisposableEffect(Unit) {
-                onDispose {
-                    onScrollDisabledChange(false)
-                }
+        when (isLoading) {
+            true -> Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-
-            when (isLoading) {
-                true -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-                false -> LazyColumn() {
-                    items(count = searchResults.size) { index ->
-                        val resultText = searchResults[index]
-                        ListItem(
-                            headlineContent = { Text(resultText) },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier
-                                .clickable {
-                                    onResultClick(resultText)
-                                    expanded = false
-                                }
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
-                        )
-                    }
+            false -> LazyColumn {
+                items(count = searchResults.size) { index ->
+                    val resultText = searchResults[index]
+                    ListItem(
+                        headlineContent = { Text(resultText) },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        modifier = Modifier
+                            .clickable {
+                                onResultClick(resultText)
+                                onExpandedChange(false)
+                            }
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
                 }
             }
         }
