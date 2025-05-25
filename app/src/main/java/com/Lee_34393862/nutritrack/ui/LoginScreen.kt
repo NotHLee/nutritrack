@@ -22,14 +22,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -57,6 +58,7 @@ import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
 import com.Lee_34393862.nutritrack.shared.showSuccessSnackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,51 +70,63 @@ fun LoginScreen(
     val isLoadingState by viewModel.isLoadingState.collectAsState()
     val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    var registerMode by rememberSaveable { mutableStateOf<Boolean>(false) }
+
+    // sync the bottom sheet state with the view model
+    LaunchedEffect(viewModel.isBottomSheetExpanded) {
+        if(viewModel.isBottomSheetExpanded) {
+            bottomSheetScaffoldState.bottomSheetState.expand()
+        } else {
+            bottomSheetScaffoldState.bottomSheetState.partialExpand()
+        }
+    }
+
+    LaunchedEffect(bottomSheetScaffoldState.bottomSheetState.targetValue) {
+        val isExpanded = bottomSheetScaffoldState.bottomSheetState.targetValue == SheetValue.Expanded
+        viewModel.isBottomSheetExpanded = isExpanded
+    }
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
-            if (registerMode)
+            if (viewModel.registerMode)
                 RegisterSheet (
+                    viewModel = viewModel,
                     scope = scope,
                     patientIds = patientIds,
                     isLoadingState = isLoadingState,
-                    onLogin = { registerMode = false },
-                    onRegister = { userId,
-                                   name,
-                                   phoneNumber,
-                                   password,
-                                   confirmPassword ->
-                            viewModel.register(userId, name, phoneNumber, password, confirmPassword)
-                     },
+                    onLogin = { viewModel.registerMode = false },
                     onSuccess = { success ->
-                        registerMode = false
-                        showSuccessSnackbar(
-                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
-                            message = success
-                        )
+                        scope.launch {
+                            showSuccessSnackbar(
+                                snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                                message = success
+                            )
+                        }
                     },
                     onError = { error ->
-                        showErrorSnackbar(
-                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
-                            message = error
-                        )
+                        scope.launch {
+                            showErrorSnackbar(
+                                snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                                message = error
+                            )
+                        }
                     }
                 )
             else {
                 LoginSheet(
-                    navigateToQuestions = { navigateToQuestions() },
+                    viewModel = viewModel,
                     scope = scope,
+                    navigateToQuestions = { navigateToQuestions() },
                     patientIds = patientIds,
                     isLoadingState = isLoadingState,
-                    onLogin = { userId, password -> viewModel.login(userId, password) },
-                    onRegister = { registerMode = true },
+                    onRegister = { viewModel.registerMode = true },
                     onError = { error ->
-                        showErrorSnackbar(
-                            snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
-                            message = error
-                        )
+                        scope.launch {
+                            showErrorSnackbar(
+                                snackbarHostState = bottomSheetScaffoldState.snackbarHostState,
+                                message = error
+                            )
+                        }
                     }
                 )
             }
@@ -184,19 +198,15 @@ fun LoginScreen(
 
 @Composable
 fun LoginSheet(
-    navigateToQuestions: () -> Unit,
+    viewModel: LoginViewModel,
     scope: CoroutineScope,
+    navigateToQuestions: () -> Unit,
     patientIds: List<String>,
     isLoadingState: LoginScreenState,
-    onLogin: suspend (String, String) -> Result<String>,
     onRegister: () -> Unit,
-    onError: suspend (String) -> Unit
+    onError: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var loginSheetDropdownExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
-    var userId by rememberSaveable { mutableStateOf<String>("") }
-    var password by rememberSaveable { mutableStateOf<String>("") }
-    var passwordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier
@@ -214,18 +224,18 @@ fun LoginSheet(
         CustomDropdownSelector(
             items = patientIds,
             label = "My ID (Provided by your clinician)",
-            expanded = loginSheetDropdownExpanded,
-            onExpandedChange = { loginSheetDropdownExpanded = it },
-            value = userId,
-            onValueChange = { userId = it },
+            expanded = viewModel.loginSheetDropdownExpanded,
+            onExpandedChange = { viewModel.loginSheetDropdownExpanded = it },
+            value = viewModel.loginUserId,
+            onValueChange = { viewModel.loginUserId = it },
         )
         Spacer(modifier = Modifier.size(16.dp))
         CustomPasswordTextField(
             labelText = "Password",
-            password = password,
-            onPasswordChange = { password = it },
-            passwordVisible = passwordVisible,
-            onToggleVisiblity = { passwordVisible = !passwordVisible }
+            password = viewModel.loginPassword,
+            onPasswordChange = { viewModel.loginPassword = it },
+            passwordVisible = viewModel.loginPasswordVisible,
+            onToggleVisiblity = { viewModel.loginPasswordVisible = !viewModel.loginPasswordVisible }
         )
         Text(
             text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
@@ -240,10 +250,11 @@ fun LoginSheet(
             Button(
                 onClick = {
                     scope.launch {
-                        onLogin(userId, password)
+                        viewModel.login()
                             .onSuccess { _ ->
                                 keyboardController?.hide()
                                 navigateToQuestions()
+                                viewModel.resetAllStates()
                             }
                             .onFailure { error ->
                                 error.message?.let { onError(it) }
@@ -334,23 +345,15 @@ fun ClickableLink() {
 
 @Composable
 fun RegisterSheet(
+    viewModel: LoginViewModel,
     scope: CoroutineScope,
     patientIds: List<String>,
     isLoadingState: LoginScreenState,
     onLogin: () -> Unit,
-    onRegister: suspend (String, String, String, String, String) -> Result<String>,
     onSuccess: suspend (String) -> Unit,
     onError: suspend (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var loginSheetDropdownExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
-    var userId by rememberSaveable { mutableStateOf<String>("") }
-    var name by rememberSaveable { mutableStateOf<String>("") }
-    var phoneNumber by rememberSaveable { mutableStateOf<String>("") }
-    var password by rememberSaveable { mutableStateOf<String>("") }
-    var confirmPassword by rememberSaveable { mutableStateOf<String>("") }
-    var passwordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
-    var confirmPasswordVisible by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     Column(
         modifier = Modifier
@@ -368,15 +371,15 @@ fun RegisterSheet(
         CustomDropdownSelector(
             items = patientIds,
             label = "My ID (Provided by your clinician)",
-            expanded = loginSheetDropdownExpanded,
-            onExpandedChange = { loginSheetDropdownExpanded = it },
-            value = userId,
-            onValueChange = { userId = it },
+            expanded = viewModel.registerSheetDropdownExpanded,
+            onExpandedChange = { viewModel.registerSheetDropdownExpanded = it },
+            value = viewModel.registerUserId,
+            onValueChange = { viewModel.registerUserId = it },
         )
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
-            value = name,
-            onValueChange = { name = it },
+            value = viewModel.registerName,
+            onValueChange = { viewModel.registerName = it },
             label = { Text("Name") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -384,8 +387,8 @@ fun RegisterSheet(
         )
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
-            value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            value = viewModel.registerPhoneNumber,
+            onValueChange = { viewModel.registerPhoneNumber = it },
             label = { Text("Phone Number") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -394,18 +397,18 @@ fun RegisterSheet(
         Spacer(modifier = Modifier.size(16.dp))
         CustomPasswordTextField(
             labelText = "Password",
-            password = password,
-            onPasswordChange = { password = it },
-            passwordVisible = passwordVisible,
-            onToggleVisiblity = { passwordVisible = !passwordVisible }
+            password = viewModel.registerPassword,
+            onPasswordChange = { viewModel.registerPassword = it },
+            passwordVisible = viewModel.registerPasswordVisible,
+            onToggleVisiblity = { viewModel.registerPasswordVisible = !viewModel.registerPasswordVisible }
         )
         Spacer(modifier = Modifier.size(16.dp))
         CustomPasswordTextField(
             labelText = "Confirm Password",
-            password = confirmPassword,
-            onPasswordChange = { confirmPassword = it },
-            passwordVisible = confirmPasswordVisible,
-            onToggleVisiblity = { confirmPasswordVisible = !confirmPasswordVisible }
+            password = viewModel.registerConfirmPassword,
+            onPasswordChange = { viewModel.registerConfirmPassword = it },
+            passwordVisible = viewModel.registerConfirmPasswordVisible,
+            onToggleVisiblity = { viewModel.registerConfirmPasswordVisible = !viewModel.registerConfirmPasswordVisible }
         )
         Text(
             text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing",
@@ -419,9 +422,10 @@ fun RegisterSheet(
             Button(
                 onClick = {
                     scope.launch {
-                        onRegister(userId, name, phoneNumber, password, confirmPassword)
+                        viewModel.register()
                             .onSuccess { success ->
                                 keyboardController?.hide()
+                                viewModel.resetRegisterState()
                                 onSuccess(success)
                             }
                             .onFailure { error ->
@@ -442,3 +446,4 @@ fun RegisterSheet(
         }
     }
 }
+

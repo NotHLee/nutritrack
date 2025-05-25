@@ -1,6 +1,10 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -33,6 +37,49 @@ class LoginViewModel(context: Context) : ViewModel() {
     private var _isLoadingState = MutableStateFlow<LoginScreenState>(LoginScreenState.Idle)
     val isLoadingState: StateFlow<LoginScreenState> get() = _isLoadingState.asStateFlow()
 
+    // ideally, we should save ui state in LoginScreen, however, due to the fact that bottom sheet
+    // recomposes when screen rotates, we need to save the state here to avoid losing the state
+    var isBottomSheetExpanded by mutableStateOf<Boolean>(false)
+    var registerMode by mutableStateOf<Boolean>(false)
+
+    // login sheet state
+    var loginSheetDropdownExpanded by mutableStateOf<Boolean>(false)
+    var loginUserId by mutableStateOf<String>("")
+    var loginPassword by mutableStateOf<String>("")
+    var loginPasswordVisible by mutableStateOf<Boolean>(false)
+
+    // register sheet state
+    var registerSheetDropdownExpanded by mutableStateOf<Boolean>(false)
+    var registerUserId by mutableStateOf<String>("")
+    var registerName by mutableStateOf<String>("")
+    var registerPhoneNumber by mutableStateOf<String>("")
+    var registerPassword by mutableStateOf<String>("")
+    var registerConfirmPassword by mutableStateOf<String>("")
+    var registerPasswordVisible by mutableStateOf<Boolean>(false)
+    var registerConfirmPasswordVisible by mutableStateOf<Boolean>(false)
+
+    fun resetAllStates() {
+        isBottomSheetExpanded = false
+        registerMode = false
+        loginUserId = ""
+        loginPassword = ""
+        loginPasswordVisible = false
+        loginSheetDropdownExpanded = false
+        resetRegisterState()
+    }
+
+    fun resetRegisterState() {
+        registerUserId = ""
+        registerName = ""
+        registerPhoneNumber = ""
+        registerPassword = ""
+        registerConfirmPassword = ""
+        registerPasswordVisible = false
+        registerConfirmPasswordVisible = false
+        registerSheetDropdownExpanded = false
+        registerMode = false
+    }
+
     init {
         viewModelScope.launch {
             _isLoadingState.value = LoginScreenState.InitialLoading
@@ -43,12 +90,12 @@ class LoginViewModel(context: Context) : ViewModel() {
         }
     }
 
-    suspend fun login(userId: String, password: String): Result<String> {
+    suspend fun login(): Result<String> {
 
         _isLoadingState.value = LoginScreenState.LoginLoading
 
         // query for patient entity with userId and match password
-        val patientFlow: Flow<Patient?> = patientRepository.getPatientByUserId(userId = userId)
+        val patientFlow: Flow<Patient?> = patientRepository.getPatientByUserId(userId = loginUserId)
         val patient: Patient? = patientFlow.firstOrNull()
 
         // null means user does not exist
@@ -64,14 +111,14 @@ class LoginViewModel(context: Context) : ViewModel() {
         }
 
         // wrong password
-        if (patient.password != password) {
+        if (patient.password != loginPassword) {
             _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Password does not match"))
         }
 
         // cache patient as current user for global access
         val updateUserJob = viewModelScope.launch {
-            patientRepository.getPatientByUserId(userId).collect { patient ->
+            patientRepository.getPatientByUserId(loginUserId).collect { patient ->
                 if (patient != null) {
                     AuthManager.saveCurrentUserSession(patient)
                 }
@@ -84,17 +131,12 @@ class LoginViewModel(context: Context) : ViewModel() {
 
     }
 
-    suspend fun register(userId: String,
-                         name: String,
-                         phoneNumber: String,
-                         password: String,
-                         confirmPassword: String
-    ): Result<String> {
+    suspend fun register(): Result<String> {
 
         _isLoadingState.value = LoginScreenState.RegisterLoading
 
         // query for patient entity with userId
-        val patientFlow: Flow<Patient?> = patientRepository.getPatientByUserId(userId = userId)
+        val patientFlow: Flow<Patient?> = patientRepository.getPatientByUserId(userId = registerUserId)
         val patient: Patient? = patientFlow.firstOrNull()
 
         // null means user does not exist
@@ -110,30 +152,30 @@ class LoginViewModel(context: Context) : ViewModel() {
         }
 
         // match phone number
-        if (patient.phoneNumber != phoneNumber) {
+        if (patient.phoneNumber != registerPhoneNumber) {
             _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Incorrect phone number"))
         }
 
         // ensure name is not empty
-        if (name.isEmpty()) {
+        if (registerName.isEmpty()) {
             _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Name cannot be empty"))
         }
 
         // ensure password is not empty
-        if (password.isEmpty()) {
+        if (registerPassword.isEmpty()) {
             _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Password cannot be empty"))
         }
 
         // ensure password and confirm password are the same
-        if (password != confirmPassword) {
+        if (registerPassword != registerConfirmPassword) {
             _isLoadingState.value = LoginScreenState.Idle
             return Result.failure(Exception("Passwords do not match"))
         }
 
-        patientRepository.update(patient.copy(name = name, password = password))
+        patientRepository.update(patient.copy(name = registerName, password = registerPassword))
         _isLoadingState.value = LoginScreenState.Idle
         return Result.success("User id successfully claimed")
     }
