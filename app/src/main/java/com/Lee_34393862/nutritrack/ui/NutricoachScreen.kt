@@ -118,8 +118,17 @@ fun NutritrackScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
-            .verticalScroll(state = rememberScrollState())
+            .verticalScroll(state = rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            "Nutricoach",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp, bottom = 8.dp)
+        )
         // load picture if fruit score optimal else load fruit search section
         if (loadingState != LoadingState.LoadingInitial) {
             when (isFruitScoreOptimal) {
