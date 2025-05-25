@@ -117,18 +117,21 @@ class NutritrackViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun searchFruit(fruitId: Int) {
-        viewModelScope.launch {
-            _loadingState.value = LoadingState.LoadingFruitSearch
-            fruityViceRepository.getFruit(fruitId)
-                .onSuccess { fruit ->
-                    _fruitDetails.value = fruit
-                }
-                .onFailure { error ->
-                    _fruitDetails.value = null
-                }
-            _loadingState.value = LoadingState.Idle
-        }
+    suspend fun searchFruit(fruitId: Int): Result<String> {
+        _loadingState.value = LoadingState.LoadingFruitSearch
+
+        fruityViceRepository.getFruit(fruitId)
+            .onSuccess { fruit ->
+                _fruitDetails.value = fruit
+                _loadingState.value = LoadingState.Idle
+                return Result.success("Fruit details loaded successfully")
+            }
+            .onFailure { error ->
+                _fruitDetails.value = null
+                _loadingState.value = LoadingState.Idle
+                return Result.failure(error)
+            }
+        throw IllegalStateException("Fruit search should not reach here")
     }
 
     // functional to generate the motivational message dynamically

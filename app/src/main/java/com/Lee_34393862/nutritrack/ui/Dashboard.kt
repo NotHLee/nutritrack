@@ -88,6 +88,7 @@ fun Dashboard(
             composable(route = DashboardScreens.Nutritrack.route) {
                 NutritrackScreen(
                     innerPadding,
+                    snackbarHostState = snackbarHostState,
                     viewModel = nutritrackViewModel
                 )
             }

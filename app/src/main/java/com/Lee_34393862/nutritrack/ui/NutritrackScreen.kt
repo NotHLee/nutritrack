@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,6 +37,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +55,9 @@ import com.Lee_34393862.nutritrack.data.viewmodel.LoadingState
 import com.Lee_34393862.nutritrack.data.viewmodel.NutritrackViewModel
 import com.Lee_34393862.nutritrack.shared.CustomSearchBar
 import com.Lee_34393862.nutritrack.shared.StreamingText
+import com.Lee_34393862.nutritrack.shared.showErrorSnackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
@@ -62,7 +67,9 @@ data class FruitDetailsText(val label: String, val value: String)
 fun NutritrackScreen(
     innerPadding: PaddingValues,
     viewModel: NutritrackViewModel = viewModel(),
+    snackbarHostState: SnackbarHostState
 ) {
+    val scope = rememberCoroutineScope()
     val loadingState by viewModel.loadingState.collectAsState()
     val fruitSuggestions by viewModel.fruitSuggestion.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
@@ -149,7 +156,9 @@ fun NutritrackScreen(
                         onQueryChange = { query = it },
                         onResultChange = { query = it },
                         onSearchBarExpandedChange = { searchBarExpanded = it },
-                        loadingState = loadingState
+                        loadingState = loadingState,
+                        scope = scope,
+                        snackbarHostState = snackbarHostState
                     )
             }
         } else {
@@ -307,6 +316,8 @@ fun MessageHistoryDialog(
 @Composable
 fun FruitSearchSection(
     viewModel: NutritrackViewModel,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
     query: String,
     fruitSuggestions: List<FruitSuggestion>,
     filteredFruitSuggestions: List<FruitSuggestion>,
@@ -322,19 +333,31 @@ fun FruitSearchSection(
         query = query,
         onQueryChange = { onQueryChange(it) },
         onSearch = { currentQuery ->
-            viewModel.searchFruit(
-                fruitSuggestions.find { fruitSuggestion ->
-                    fruitSuggestion.name == currentQuery
-                }?.id ?: -1
-            )
+            scope.launch {
+                viewModel.searchFruit(
+                    fruitSuggestions.find { fruitSuggestion ->
+                        fruitSuggestion.name == currentQuery
+                    }?.id ?: -1
+                )
+                .onSuccess { }
+                .onFailure { error ->
+                    showErrorSnackbar(snackbarHostState, error.message.toString())
+                }
+            }
         },
         onResultClick = { result ->
             onResultChange(result)
-            viewModel.searchFruit(
-                fruitSuggestions.find { fruitSuggestion ->
-                    fruitSuggestion.name == result
-                }?.id ?: -1
-            )
+            scope.launch {
+                viewModel.searchFruit(
+                    fruitSuggestions.find { fruitSuggestion ->
+                        fruitSuggestion.name == result
+                    }?.id ?: -1
+                )
+                .onSuccess { }
+                .onFailure { error ->
+                    showErrorSnackbar(snackbarHostState, error.message.toString())
+                }
+            }
         },
         searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name },
         expanded = searchBarExpanded,

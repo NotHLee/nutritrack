@@ -47,12 +47,15 @@ fun CustomSearchBar(
         onQueryChange = onQueryChange,
         onSearch = {
             onSearch(query)
+            // this should collapse the search bar after search
+            // however, it doesn't work if you hit enter with the keyboard on an android emulator
+            // only using the on screen keyboard's search button works since it listens to ImeAction.Search
             onExpandedChange(false)
         },
         active = expanded,
         onActiveChange = {
             onExpandedChange(it)
-         },
+        },
         placeholder = {
             Text("Search for fruit")
         },
