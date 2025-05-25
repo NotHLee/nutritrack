@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +52,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.Lee_34393862.nutritrack.data.network.FruityViceResponseModel
 import com.Lee_34393862.nutritrack.data.repositories.FruitSuggestion
 import com.Lee_34393862.nutritrack.data.viewmodel.LoadingState
@@ -59,6 +63,7 @@ import com.Lee_34393862.nutritrack.shared.CustomSearchBar
 import com.Lee_34393862.nutritrack.shared.StreamingText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 data class FruitDetailsText(val label: String, val value: String)
@@ -66,8 +71,12 @@ data class FruitDetailsText(val label: String, val value: String)
 @Composable
 fun NutritrackScreen(
     innerPadding: PaddingValues,
-    viewModel: NutritrackViewModel,
+    viewModel: NutritrackViewModel = viewModel(),
 ) {
+    // TODO: fix crash on rotation
+    // TODO: fix exit search bar expansion after onSearch error value
+    // TODO: show blank indicator for all tips
+    // TODO: Fix url rotation thingy fuck you viewmodel
     val loadingState by viewModel.loadingState.collectAsState()
     val fruitSuggestions by viewModel.fruitSuggestion.collectAsState()
     val fruitDetails by viewModel.fruitDetails.collectAsState()
@@ -101,7 +110,6 @@ fun NutritrackScreen(
         }
     }
     var isMessageHistoryDialogOpen by rememberSaveable { mutableStateOf<Boolean>(false) }
-    val scrollState = rememberScrollState()
     var searchBarExpanded by rememberSaveable { mutableStateOf<Boolean>(false) }
 
     // dialog to show message history
@@ -117,25 +125,26 @@ fun NutritrackScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
-            .then(if (!searchBarExpanded) Modifier.verticalScroll(scrollState) else Modifier)
+            .verticalScroll(state = rememberScrollState())
     ) {
         // load picture if fruit score optimal else load fruit search section
         if (loadingState != LoadingState.LoadingInitial) {
             when (isFruitScoreOptimal) {
                 null -> { }
-                true -> {
-                    AsyncImage(
-                        model = "https://picsum.photos/900/1000",
-                        contentDescription = "Random Image",
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 16.dp)
-                            .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(16.dp)
-                            )
-                    )
-                }
+                true -> SubcomposeAsyncImage (
+                            model = "https://picsum.photos/900/1000?random=${Random.nextInt()}",
+                            contentDescription = "Random Image",
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp)
+                                .fillMaxWidth(),
+                            loading = {
+                                CircularProgressIndicator(modifier = Modifier
+                                    .requiredSize(40.dp)
+                                    .fillMaxHeight(0.4f)
+                                )
+                            },
+                        )
                 false ->
                     FruitSearchSection(
                         viewModel = viewModel,
@@ -156,7 +165,6 @@ fun NutritrackScreen(
                     .weight(0.4f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
-
             ) {
                 CircularProgressIndicator(
                 )
@@ -164,6 +172,7 @@ fun NutritrackScreen(
         }
         Spacer(modifier = Modifier.size(16.dp))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Spacer(modifier = Modifier.height(300.dp))
         Column {
             Button(
                 onClick = { viewModel.generateMotivationalMessage() },
@@ -326,7 +335,6 @@ fun FruitSearchSection(
             )
         },
         searchResults = filteredFruitSuggestions.map { fruitSuggestion -> fruitSuggestion.name },
-        onScrollDisabledChange = { onSearchBarExpandedChange(it) }
     )
     Spacer (modifier = Modifier.size(24.dp))
 
