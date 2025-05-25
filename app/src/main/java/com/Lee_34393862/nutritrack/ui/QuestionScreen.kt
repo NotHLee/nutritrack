@@ -1,7 +1,6 @@
 package com.Lee_34393862.nutritrack.ui
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,10 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 import com.Lee_34393862.nutritrack.data.viewmodel.QuestionsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomDropdownSelector
 import com.Lee_34393862.nutritrack.shared.CustomSnackbarHost

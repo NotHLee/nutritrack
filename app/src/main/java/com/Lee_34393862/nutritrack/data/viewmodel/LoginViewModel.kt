@@ -3,7 +3,6 @@ package com.Lee_34393862.nutritrack.data.viewmodel
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -11,12 +10,10 @@ import androidx.lifecycle.viewModelScope
 import com.Lee_34393862.nutritrack.data.AuthManager
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import com.Lee_34393862.nutritrack.data.repositories.PatientRepository
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -180,6 +177,7 @@ class LoginViewModel(context: Context) : ViewModel() {
         return Result.success("User id successfully claimed")
     }
 
+    @Suppress("UNCHECKED_CAST")
     class LoginViewModelFactory(context: Context) : ViewModelProvider.Factory {
         private val context = context.applicationContext
         override fun <T: ViewModel> create(modelClass: Class<T>): T =

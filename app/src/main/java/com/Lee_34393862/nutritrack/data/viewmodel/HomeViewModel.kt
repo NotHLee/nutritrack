@@ -1,7 +1,5 @@
 package com.Lee_34393862.nutritrack.data.viewmodel
 
-import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class HomeViewModel(context: Context): ViewModel() {
+class HomeViewModel(): ViewModel() {
 
     // store current user's name and total food score as flow
     private var _currentUserName = MutableStateFlow<String>("")
@@ -37,9 +35,9 @@ class HomeViewModel(context: Context): ViewModel() {
         }
     }
 
-    class HomeViewModelFactory(context: Context): ViewModelProvider.Factory {
-        private val context = context.applicationContext
+    @Suppress("UNCHECKED_CAST")
+    class HomeViewModelFactory(): ViewModelProvider.Factory {
         override fun <T: ViewModel> create(modelClass: Class<T>): T =
-            HomeViewModel(context) as T
+            HomeViewModel() as T
     }
 }

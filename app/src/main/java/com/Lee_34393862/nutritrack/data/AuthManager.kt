@@ -1,6 +1,5 @@
 package com.Lee_34393862.nutritrack.data
 
-import android.util.Log
 import com.Lee_34393862.nutritrack.data.entities.Patient
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
