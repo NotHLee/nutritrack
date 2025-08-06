@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,17 +43,21 @@ fun CustomLabelledProgressBar(
         Text(
             label,
             modifier = Modifier
-                .weight(1.5f)
+                .weight(0.30f),
+            style = MaterialTheme.typography.labelMedium
         )
+        Spacer(modifier = Modifier.size(8.dp))
         CustomProgressBar(
             progressValue = progressValue,
             progressMax = progressMax,
-            modifier = Modifier.weight(2f)
+            modifier = Modifier.weight(0.50f)
         )
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             "$progressValue/${progressMax.toInt()}",
-            modifier = Modifier.weight(0.7f),
-            textAlign = TextAlign.End
+            modifier = Modifier.weight(0.20f),
+            textAlign = TextAlign.End,
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
@@ -64,7 +69,7 @@ fun CustomProgressBar(
     modifier: Modifier,
 ) {
 
-    var progress by remember { mutableFloatStateOf(progressValue/progressMax) }
+    var progress by remember(progressValue) { mutableFloatStateOf(progressValue/progressMax) }
 
     Box(
         contentAlignment = Alignment.CenterStart,

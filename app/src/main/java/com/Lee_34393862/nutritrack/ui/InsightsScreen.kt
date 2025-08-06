@@ -1,4 +1,4 @@
-package com.Lee_34393862.nutritrack.screen
+package com.Lee_34393862.nutritrack.ui
 
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -21,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.InsightsViewModel
 import com.Lee_34393862.nutritrack.shared.CustomLabelledProgressBar
 import com.Lee_34393862.nutritrack.shared.CustomProgressBar
 
@@ -37,74 +41,75 @@ data class FoodScore(val name: String, val score: Float, val scoreMax: Float)
 @Composable
 fun InsightsScreen(
     innerPadding: PaddingValues,
-    patientRepository: PatientRepository,
+    viewModel: InsightsViewModel,
     navigateToNutritrack: () -> Unit
 ) {
 
+    val currentUser by viewModel.currentUser.collectAsState()
     val foodScoreList: List<FoodScore> = listOf(
         FoodScore(
             name = "Vegetables",
-            score = patientRepository.queryFoodScore("Vegetables").toFloat(),
+            score = currentUser?.vegetablesHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Fruits",
-            score = patientRepository.queryFoodScore("Fruit").toFloat(),
+            score = currentUser?.fruitHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Grains & Cereals",
-            score = patientRepository.queryFoodScore("Grainsandcereals").toFloat(),
+            score = currentUser?.grainsAndCerealsHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Whole Grains",
-            score = patientRepository.queryFoodScore("Wholegrains").toFloat(),
+            score = currentUser?.wholeGrainsHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Meat & Alternatives",
-            score = patientRepository.queryFoodScore("Meatandalternatives").toFloat(),
+            score = currentUser?.meatAndAlternativesHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Dairy",
-            score = patientRepository.queryFoodScore("Dairyandalternatives").toFloat(),
+            score = currentUser?.dairyAndAlternativesHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Water",
-            score = patientRepository.queryFoodScore("Water").toFloat(),
+            score = currentUser?.waterHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Unsaturated Fats",
-            score = patientRepository.queryFoodScore("UnsaturatedFat").toFloat(),
+            score = currentUser?.unsaturatedFatHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Saturated Fats",
-            score = patientRepository.queryFoodScore("SaturatedFat").toFloat(),
+            score = currentUser?.saturatedFatHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Sodium",
-            score = patientRepository.queryFoodScore("Sodium").toFloat(),
+            score = currentUser?.sodiumHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Sugar",
-            score = patientRepository.queryFoodScore("Sugar").toFloat(),
+            score = currentUser?.sugarHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         ),
         FoodScore(
             name = "Alcohol",
-            score = patientRepository.queryFoodScore("Alcohol").toFloat(),
+            score = currentUser?.alcoholHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 5.0f
         ),
         FoodScore(
             name = "Discretionary Foods",
-            score = patientRepository.queryFoodScore("Discretionary").toFloat(),
+            score = currentUser?.discretionaryHeifaScore?.toFloat() ?: 0.0f,
             scoreMax = 10.0f
         )
     )
@@ -115,6 +120,7 @@ fun InsightsScreen(
             .padding(innerPadding)
             .padding(16.dp)
             .fillMaxWidth()
+            .verticalScroll(state = rememberScrollState())
     ){
         Box(
             contentAlignment = Alignment.Center,
@@ -143,12 +149,12 @@ fun InsightsScreen(
         Spacer(modifier = Modifier.size(size = 4.dp))
         Row {
             CustomProgressBar(
-                progressValue = patientRepository.getTotalFoodScore().toFloat(),
+                progressValue = currentUser?.heifaTotalScore?.toFloat() ?: 0.0f,
                 progressMax = 100f,
                 modifier = Modifier.weight(1f)
             )
             Text(
-                "${patientRepository.getTotalFoodScore().toFloat()}/100",
+                "${currentUser?.heifaTotalScore?.toFloat() ?: 0.0f}/100",
                 textAlign = TextAlign.End,
                 modifier = Modifier.padding(start = 16.dp)
             )
@@ -164,7 +170,7 @@ fun InsightsScreen(
                     val shareIntent = Intent(ACTION_SEND)
                     shareIntent.type = "text/plain"
                     shareIntent.putExtra(Intent.EXTRA_TEXT,
-                        "Hi, I just got a HEIFA score of ${patientRepository.getTotalFoodScore()}!"
+                        "Hi, I just got a HEIFA score of ${currentUser?.heifaTotalScore ?: 0.0}!"
                     )
                     startActivity(
                         context,

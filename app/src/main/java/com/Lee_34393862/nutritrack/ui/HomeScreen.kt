@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
@@ -28,6 +30,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,30 +43,41 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.Lee_34393862.nutritrack.R
-import com.Lee_34393862.nutritrack.data.PatientRepository
+import com.Lee_34393862.nutritrack.data.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     innerPadding: PaddingValues,
-    patientRepository: PatientRepository,
+    viewModel: HomeViewModel,
     navigateToQuestion: () -> Unit,
     navigateToInsights: () -> Unit
 ) {
+
+    val currentUserName by viewModel.currentUserName.collectAsState()
+    val currentUserTotalFoodScore by viewModel.currentUserTotalFoodScore.collectAsState()
+
     Column(
-        modifier = Modifier.padding(16.dp).padding(innerPadding)
+        modifier = Modifier
+            .padding(16.dp)
+            .padding(innerPadding)
+            .verticalScroll(rememberScrollState())
     ) {
         Greetings(
-            userId = patientRepository.queryPatientData("User_ID").getOrDefault("Rosie"),
+            name = currentUserName,
             navigateToEdit = { navigateToQuestion() }
         )
+        Spacer(modifier = Modifier.size(8.dp))
         Image(
             painter = painterResource(R.drawable.foodplate),
             contentDescription = "foodplate",
             contentScale = ContentScale.FillHeight,
-            modifier = Modifier.height(256.dp)
+            modifier = Modifier
+                .height(256.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
         )
         MyScore(
-            foodScore = patientRepository.getTotalFoodScore(),
+            foodScore = currentUserTotalFoodScore.toString(),
             navigateToInsights = { navigateToInsights() }
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -72,7 +87,7 @@ fun HomeScreen(
 
 @Composable
 fun Greetings(
-    userId: String,
+    name: String,
     navigateToEdit: () -> Unit
 ) {
     Text(
@@ -83,7 +98,7 @@ fun Greetings(
         color = Color.Gray
     )
     Text(
-        userId,
+        name,
         style = MaterialTheme.typography.headlineLarge,
         fontWeight = FontWeight.Bold,
         fontSize = 48.sp
@@ -97,12 +112,14 @@ fun Greetings(
         Text(
             "You already filled in your Food Intake Questionnaire, but you can change details here:",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.fillMaxWidth(0.70f),
+            modifier = Modifier.weight(0.70f),
             textAlign = TextAlign.Justify
         )
+        Spacer(modifier = Modifier.size(16.dp))
         Button(
             onClick = { navigateToEdit() },
-            shape = RoundedCornerShape(size = 8.dp)
+            shape = RoundedCornerShape(size = 8.dp),
+            modifier = Modifier.weight(0.3f)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -127,7 +144,7 @@ fun MyScore(
     ){
         Text(
             "My Score",
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.ExtraBold
         )
         TextButton(
@@ -158,7 +175,7 @@ fun MyScore(
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.tertiaryContainer),
             ) {
@@ -170,14 +187,14 @@ fun MyScore(
                     contentDescription = "arrow_up",
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .size(30.dp),
+                        .size(24.dp),
                     tint = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.tertiaryContainer)
                 )
             }
             Spacer(Modifier.size(size = 16.dp))
             Text(
                 "Your Food Quality score",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
         Text(
